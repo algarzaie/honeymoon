@@ -48,7 +48,7 @@ section > h2{font-size:28px;color:var(--myrtle);margin-bottom:8px}
 .filterbar button{all:unset;cursor:pointer;color:var(--myrtle);font-weight:600}
 .panel{display:grid;gap:14px;margin-top:12px}
 details.day{background:var(--card);border:1px solid var(--line);border-radius:14px;overflow:hidden}
-details.day summary{list-style:none;cursor:pointer;display:grid;grid-template-columns:auto 1fr auto;gap:14px;align-items:center;padding:12px 16px}
+details.day summary{list-style:none;cursor:pointer;display:grid;grid-template-columns:auto 1fr auto auto;gap:14px;align-items:center;padding:12px 16px}
 details.day summary::-webkit-details-marker{display:none}
 details.day summary:focus-visible{outline:2px solid var(--myrtle);outline-offset:-2px}
 .dnum{text-align:center;min-width:64px;line-height:1.15;padding-inline-end:12px;border-inline-end:1px solid var(--line)}
@@ -88,7 +88,7 @@ details[open] .chev{transform:rotate(180deg)}
 .ess input:checked + div b{text-decoration:line-through;color:var(--muted)}
 footer{margin-top:36px;text-align:center;color:var(--myrtle);font-family:var(--display);font-size:22px}
 @media (max-width:480px){.wrap{padding-inline:16px}header{grid-template-columns:1fr}.star{width:52px;height:52px}
- details.day summary{grid-template-columns:auto 1fr auto;gap:10px;padding:10px 12px}.tl li{grid-template-columns:54px 1fr;gap:10px}.leg{grid-template-columns:1fr;gap:2px}}
+ details.day summary{grid-template-columns:auto 1fr auto auto;gap:10px;padding:10px 12px}.tl li{grid-template-columns:54px 1fr;gap:10px}.leg{grid-template-columns:1fr;gap:2px}}
 @media (prefers-reduced-motion:reduce){.chev{transition:none}}
 
 .ph{margin:10px 0 0;border-radius:10px;overflow:hidden;aspect-ratio:3/2;background:var(--line);max-width:100%}
@@ -182,6 +182,15 @@ dialog.shop[open]{animation:shopin .25s ease-out}
 .hero header,.hero .next{text-shadow:0 0 10px var(--bg),0 0 3px var(--bg)}
 @media (max-width:480px){.hero{margin:-28px -16px 0;padding:28px 16px 12px}}
 @media (prefers-reduced-motion:reduce){.slides .sl{transition:none}}
+.hero{display:flex;flex-direction:column;min-height:clamp(340px,78vw,460px)}
+.hero .toprow{order:1;align-self:flex-end;margin-top:30px}
+.hero .count{order:2;align-self:flex-end;justify-content:flex-end;max-width:380px;margin-top:10px}
+.hero .count .next{text-align:end}
+.hero header{order:3;margin-top:auto;padding-top:28px;grid-template-columns:1fr}
+.hero h1{font-family:'Reem Kufi',var(--display);font-weight:700;letter-spacing:0}
+.hero .eyebrow,.hero .sub{font-family:'Reem Kufi',var(--body)}
+.hero .sub{font-weight:500}
+
 /* City inside the date block of every day */
 .dnum em{display:block;font-style:normal;font-family:var(--body);font-size:12px;font-weight:600;color:var(--myrtle);white-space:nowrap;margin-top:1px}
 /* Countdown label */
@@ -227,6 +236,16 @@ dialog.shop[open]{animation:shopin .25s ease-out}
 /* Trip editor (owner only) */
 .edbtn{all:unset;box-sizing:border-box;position:fixed;inset-inline-end:16px;bottom:calc(16px + env(safe-area-inset-bottom,0px));z-index:6;cursor:pointer;background:var(--gold);color:var(--card);font-weight:700;border-radius:999px;padding:10px 16px;box-shadow:0 4px 16px rgba(0,0,0,.2);font-size:15px}
 .edbtn:focus-visible{outline:2px solid var(--myrtle);outline-offset:3px}
+.dayed{all:unset;box-sizing:border-box;cursor:pointer;width:34px;height:34px;border-radius:50%;display:grid;place-items:center;font-size:16px;color:var(--gold);border:1px solid var(--gold);background:var(--card);flex:none}
+.dayed:focus-visible{outline:2px solid var(--myrtle);outline-offset:2px}
+.ed .dv h3{margin:0 0 6px}
+.ed .dv .it{display:flex;flex-wrap:wrap;gap:6px;align-items:center;padding:8px 0;border-bottom:1px solid var(--line)}
+.ed .dv .it b{flex:1 1 160px;font-weight:600}
+.ed .dv .it input,.ed .dv .it select{width:auto;min-width:0;font-size:14px;padding:4px 6px}
+.ed .dv .mini{all:unset;cursor:pointer;font-size:13px;border:1px solid var(--line);border-radius:999px;padding:3px 10px;background:var(--card);color:var(--ink)}
+.ed .dv .mini.warn{color:#a33}
+.ed .dv .ml{padding:8px 0;border-bottom:1px solid var(--line)}
+.ed .dv .ml small{color:var(--muted);display:block}
 dialog.ed{border:0;padding:0;border-radius:18px;width:min(560px,calc(100vw - 24px));max-height:88dvh;background:var(--bg);color:var(--ink);box-shadow:0 10px 40px rgba(0,0,0,.3)}
 dialog.ed::backdrop{background:rgba(10,20,22,.45)}
 .ed .eh{display:flex;justify-content:space-between;align-items:center;padding:16px 18px 10px;border-bottom:1px solid var(--line)}
@@ -285,8 +304,9 @@ li.edited{background:color-mix(in srgb,var(--gold-soft) 60%,transparent);border-
 .rate .rother{margin-top:8px;padding:8px 10px;border-radius:10px;background:var(--myrtle-soft);font-size:14px}
 .rate .rother p{margin:4px 0 0;color:var(--muted)}
 .rtoast{position:fixed;inset-inline:16px;bottom:calc(72px + env(safe-area-inset-bottom,0px));z-index:7;background:var(--ink);color:var(--card);border-radius:12px;padding:10px 14px;font-size:14px;text-align:center}
-</style></head><body><div class="wrap" lang="ar" dir="rtl">
-<div class="hero" id="hero"><div class="slides" id="slides" aria-hidden="true"><div class="sl on" style="background-image:url('img/gran_via_1.jpg')"></div><div class="sl"></div></div><span class="hero-cap" id="hero-cap" aria-hidden="true">مدريد</span><div class="dots" id="dots" aria-hidden="true"></div><header><svg viewBox="0 0 100 100" class="star" aria-hidden="true"><g fill="none" stroke="currentColor" stroke-width="2.4"><rect x="22" y="22" width="56" height="56"/><rect x="22" y="22" width="56" height="56" transform="rotate(45 50 50)"/><circle cx="50" cy="50" r="13"/></g><circle cx="50" cy="50" r="4" fill="currentColor"/></svg><div><div class="eyebrow">شهر العسل · 4–18 نوفمبر 2026</div><h1>حاتم ولمياء في إسبانيا</h1><p class="sub">مدريد وبرشلونة وغرناطة وقرطبة وساحل الأندلس، ويوم عبر المضيق في طنجة.</p></div></header>
+</style><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Reem+Kufi:wght@500;700&display=swap" rel="stylesheet">
+</head><body><div class="wrap" lang="ar" dir="rtl">
+<div class="hero" id="hero"><div class="slides" id="slides" aria-hidden="true"><div class="sl on" style="background-image:url('img/gran_via_1.jpg')"></div><div class="sl"></div></div><span class="hero-cap" id="hero-cap" aria-hidden="true">مدريد</span><div class="dots" id="dots" aria-hidden="true"></div><header><div><div class="eyebrow">شهر العسل · 4–18 نوفمبر 2026</div><h1>حاتم ولمياء في إسبانيا</h1><p class="sub">مدريد وبرشلونة وغرناطة وقرطبة وساحل الأندلس، ويوم عبر المضيق في طنجة.</p></div></header>
 <div class="toprow"><a class="note top" href="https://github.com/algarzaie/honeymoon/issues/new?title=%D9%85%D9%84%D8%A7%D8%AD%D8%B8%D8%A9%20%D8%B9%D8%A7%D9%85%D8%A9%20%D8%B9%D9%84%D9%89%20%D8%A7%D9%84%D8%B1%D8%AD%D9%84%D8%A9" target="_blank" rel="noopener">✎ اكتبي ملاحظة عامة</a></div>
 <div class="count" id="count" aria-live="polite"><div><b>4 نوفمبر</b><span>موعد الانطلاق</span></div></div>
 </div>
@@ -479,7 +499,7 @@ tick();setInterval(tick,30000);
  function sortTl(ol){[...ol.children].sort((a,b)=>hm(a.querySelector('time bdi,time').textContent.trim())-hm(b.querySelector('time bdi,time').textContent.trim())).forEach(li=>ol.appendChild(li))}
  function setTime(li,t){const b=li.querySelector('time bdi')||li.querySelector('time');b.textContent=t;li.classList.add('edited')}
  function apply(root,o){const D=n=>{const d=dayEl(root,n);if(!d)throw new Error(`لا يوجد يوم رقم ${n}.`);return d};
-  if(!/^(move|time|del|add|swap|sleep)$/.test(o.op))throw new Error('نوع تعديل غير معروف.');
+  if(!/^(move|time|del|add|swap|sleep|meal)$/.test(o.op))throw new Error('نوع تعديل غير معروف.');
   if(['move','time','add'].includes(o.op)&&isNaN(hm(o.time)))throw new Error('اكتب الوقت بصيغة 14:30.');
   if(o.op==='move'||o.op==='time'||o.op==='del'){const d=D(o.day),li=findLi(d,o.item);if(!li)throw new Error(`لم أجد «${o.item}» في اليوم ${o.day}.`);
    if(o.op==='del'){li.remove();return}
@@ -493,10 +513,12 @@ tick();setInterval(tick,30000);
    const ea=ma.querySelector('.dnum em'),eb=mb.querySelector('.dnum em');if(ea&&eb){const t=ea.textContent;ea.textContent=eb.textContent;eb.textContent=t}
    const sa=a.querySelector('.sleep'),sb=b.querySelector('.sleep');pb.forEach(c=>a.insertBefore(c,sa));pa.forEach(c=>b.insertBefore(c,sb));
    [...a.querySelectorAll('ol.tl>li'),...b.querySelectorAll('ol.tl>li')].forEach(li=>li.classList.add('edited'));return}
+  if(o.op==='meal'){const d=D(o.day);const m=[...d.querySelectorAll('.food:not(.shop) .meal')].find(x=>(x.querySelector('h4')?.textContent||'').trim()===o.meal);const rs=m&&[...m.querySelectorAll('.rest')];if(!rs||rs.length<2)throw new Error(`لا يوجد بديل لـ${o.meal} في اليوم ${o.day}.`);
+   const ka=rs[0].querySelector('.rk'),kb=rs[1].querySelector('.rk');if(ka&&kb){const t=ka.textContent;ka.textContent=kb.textContent;kb.textContent=t}rs[0].parentNode.insertBefore(rs[1],rs[0]);rs[1].classList.add('edited');return}
   if(o.op==='sleep'){const d=D(o.day);if(!o.city||!o.city.trim())throw new Error('اكتب اسم المدينة.');d.dataset.city=o.city.trim();
    const p=d.querySelector('.dhead p');if(p)p.textContent=p.textContent.split('·')[0].trim()+' · '+o.city.trim();
    const s=d.querySelector('.sleep');if(s)s.innerHTML=`نبيت الليلة في: <b>${esc(o.city.trim())}</b> <small>(يُحدَّد الفندق)</small>`;return}}
- const say=o=>({move:`نقل «${o.item}» من اليوم ${o.day} إلى اليوم ${o.to} الساعة ${o.time}`,time:`تغيير وقت «${o.item}» يوم ${o.day} إلى ${o.time}`,del:`حذف «${o.item}» من اليوم ${o.day}`,add:`إضافة «${o.title}» يوم ${o.day} الساعة ${o.time}`,swap:`تبديل برنامج اليوم ${o.a} واليوم ${o.b}`,sleep:`المبيت ليلة اليوم ${o.day} في ${o.city}`}[o.op]||o.op);
+ const say=o=>({move:`نقل «${o.item}» من اليوم ${o.day} إلى اليوم ${o.to} الساعة ${o.time}`,time:`تغيير وقت «${o.item}» يوم ${o.day} إلى ${o.time}`,del:`حذف «${o.item}» من اليوم ${o.day}`,add:`إضافة «${o.title}» يوم ${o.day} الساعة ${o.time}`,swap:`تبديل برنامج اليوم ${o.a} واليوم ${o.b}`,sleep:`المبيت ليلة اليوم ${o.day} في ${o.city}`,meal:`اعتماد البديل في ${o.meal} يوم ${o.day}`}[o.op]||o.op);
 
  /* Three layers: the approved plan (everyone), proposals waiting for Hatam, and this person's own try-out draft (this device only) */
  let approved=[],draft=[],props=[],preview=null,isOwner=false,platform='site',db=null,sample=null;
@@ -538,12 +560,13 @@ tick();setInterval(tick,30000);
  dlg.innerHTML=`<div class="eh"><h2>${isOwner?'تعديل الرحلة':'جرّبي تعديل الرحلة'}</h2><button type="button" class="b alt" data-x>إغلاق</button></div><div class="eb">
  <p class="hint">${isOwner?'جرّب أي تعديل وشاهده في البرنامج فوراً، ثم اعتمده ليظهر للجميع.':'جرّبي أي تعديل وشاهديه في البرنامج فوراً على جهازك. وحين يعجبك، أرسليه لحاتم ليوافق عليه.'}</p>
  ${sample?`<div><label>اكتب التعديل بكلامك<textarea id="ai-q" rows="2" placeholder="مثال: انقل ركوب الخيل إلى يوم 15 الساعة 17:00"></textarea></label><div class="btns" style="margin-top:6px"><button type="button" class="b" id="ai-go">اقترح التعديل</button></div></div><div class="sec"></div>`:''}
+ <div id="e-dayview" class="dv" hidden></div><div id="e-form">
  <label>نوع التعديل<select id="e-op"><option value="move">نقل نشاط إلى يوم آخر</option><option value="time">تغيير وقت نشاط</option><option value="add">إضافة نشاط</option><option value="del">حذف نشاط</option><option value="swap">تبديل برنامج يومين</option><option value="sleep">تغيير مدينة المبيت</option></select></label>
  <div class="row"><label id="l-day">اليوم<select id="e-day"></select></label><label id="l-to">إلى اليوم<select id="e-to"></select></label></div>
  <label id="l-item">النشاط<select id="e-item"></select></label>
  <div class="row"><label id="l-time">الوقت<input id="e-time" type="time" step="300"></label><label id="l-city">المدينة<input id="e-city" list="e-cities"><datalist id="e-cities"></datalist></label></div>
  <label id="l-title">اسم النشاط<input id="e-title"></label>
- <div class="btns"><button type="button" class="b" id="e-go">تحقق وجرّب</button></div>
+ <div class="btns"><button type="button" class="b" id="e-go">تحقق وجرّب</button></div></div>
  <div id="e-msg"></div>
  <div class="sec"><h3>${isOwner?'تجربتك':'تجربتك'} <small>(تظهر لك فقط على هذا الجهاز)</small></h3><ol class="log" id="e-draft"></ol><div class="btns" style="margin-top:8px"><button type="button" class="b" id="e-submit">${isOwner?'اعتمد للجميع':'أرسلي لحاتم للموافقة'}</button><button type="button" class="b alt" id="e-undo">تراجع</button><button type="button" class="b alt" id="e-clear">مسح التجربة</button></div></div>
  <div class="sec"><h3>بانتظار الموافقة</h3><div id="e-pend"></div></div>
@@ -599,7 +622,33 @@ tick();setInterval(tick,30000);
  $e('#e-clear').onclick=()=>{if(!draft.length)return;draft=[];saveDraft();render();redraw();fillDays();msg('ok','مُسحت التجربة، وعاد البرنامج كما هو.')};
  const un=$e('#e-unapprove');if(un)un.onclick=async()=>{if(!approved.length)return;if(!confirm('التراجع عن آخر تعديل معتمد للجميع؟'))return;approved=approved.slice(0,-1);try{await db.doc('plan/edits').set({ops:approved,at:Date.now()})}catch(e){}render();redraw();fillDays()};
  dlg.querySelector('[data-x]').onclick=()=>dlg.close();dlg.addEventListener('click',e=>{if(e.target===dlg)dlg.close()});
- btn.onclick=async()=>{if(platform==='site')await loadIssues(true).then(ok=>{if(ok)render()});fillDays();shape();redraw();msg('','');dlg.showModal()};
+ /* per-day editor: the day's activities and its alternative meal picks, through the same draft → rules check → approval flow */
+ let dayN=null;
+ function drawDay(){const box=$e('#e-dayview');if(!dayN){box.hidden=true;$e('#e-form').hidden=false;return}
+  const M=model(panel),d=M[dayN-1];if(!d){dayN=null;drawDay();return}
+  const opts=M.map(x=>`<option value="${x.n}"${x.n===dayN?' selected':''}>اليوم ${x.n} · ${+x.date.slice(8)} نوفمبر</option>`).join('');
+  const de=dayEl(panel,dayN);const meals=[...de.querySelectorAll('.food:not(.shop) .meal')].map(m=>{const nm=(m.querySelector('h4')?.textContent||'').trim();const rs=[...m.querySelectorAll('.rest')].map(r=>(r.querySelector('.rtop b')?.textContent||'').trim());return {nm,rs}}).filter(m=>m.rs.length>1);
+  box.hidden=false;$e('#e-form').hidden=true;
+  box.innerHTML=`<h3>فعاليات اليوم ${d.n} · ${DAYS_AR[d.wd]} ${+d.date.slice(8)} نوفمبر · ${esc(d.place||d.city)}</h3>`+
+   d.items.map((x,i)=>`<div class="it" data-i="${i}"><b>${esc(x.title)}</b><input type="time" step="300" value="${esc(x.time)}" data-t aria-label="الوقت"><button type="button" class="mini" data-act="time">تغيير الوقت</button><select data-to aria-label="نقل إلى">${opts}</select><button type="button" class="mini" data-act="move">نقل</button><button type="button" class="mini warn" data-act="del">حذف</button></div>`).join('')+
+   `<div class="it"><input data-nt placeholder="نشاط جديد" style="flex:1 1 140px"><input type="time" step="300" value="16:00" data-nh aria-label="الوقت"><button type="button" class="mini" data-act="add">إضافة</button></div>`+
+   (meals.length?`<h3 style="margin-top:12px">المقترح البديل</h3>`+meals.map(m=>`<div class="ml"><b>${esc(m.nm)}</b><small>اقتراحنا: <bdi>${esc(m.rs[0])}</bdi> · البديل: <bdi>${esc(m.rs[1])}</bdi></small><button type="button" class="mini" data-act="meal" data-meal="${esc(m.nm)}" style="margin-top:6px">${isOwner?'اعتمد البديل':'جرّبي البديل'}</button></div>`).join(''):'')+
+   `<div class="btns" style="margin-top:10px"><button type="button" class="b alt" data-act="general">تعديلات أخرى (تبديل يومين، مدينة المبيت)</button></div>`}
+ $e('#e-dayview').addEventListener('click',e=>{const t=e.target.closest('[data-act]');if(!t)return;const act=t.dataset.act;
+  if(act==='general'){dayN=null;drawDay();fillDays();shape();return}
+  if(act==='meal'){propose([{op:'meal',day:dayN,meal:t.dataset.meal}]);drawDay();return}
+  if(act==='add'){const row=t.closest('.it');propose([{op:'add',day:dayN,time:row.querySelector('[data-nh]').value,title:row.querySelector('[data-nt]').value}]);drawDay();return}
+  const row=t.closest('.it'),it=model(panel)[dayN-1].items[+row.dataset.i];if(!it)return;const time=row.querySelector('[data-t]').value;
+  if(act==='time')propose([{op:'time',day:dayN,item:it.title,time}]);
+  if(act==='move')propose([{op:'move',day:dayN,item:it.title,to:+row.querySelector('[data-to]').value,time}]);
+  if(act==='del')propose([{op:'del',day:dayN,item:it.title}]);
+  drawDay()});
+ function openDay(n){dayN=n;fillDays();shape();redraw();msg('','');drawDay();dlg.showModal();$e('.eb').scrollTop=0}
+ function addDayIcons(){panel.querySelectorAll('details.day').forEach((d,i)=>{const s=d.querySelector('summary');if(!s||s.querySelector('.dayed'))return;const b=document.createElement('button');b.type='button';b.className='dayed';b.textContent='✎';b.title=b.ariaLabel='تعديل هذا اليوم';b.dataset.day=i+1;s.insertBefore(b,s.querySelector('.chev'))})}
+ panel.addEventListener('click',e=>{const b=e.target.closest('.dayed');if(!b)return;e.preventDefault();e.stopPropagation();openDay(+b.dataset.day)});
+ window.addEventListener('plan-render',addDayIcons);addDayIcons();
+
+ btn.onclick=async()=>{dayN=null;drawDay();if(platform==='site')await loadIssues(true).then(ok=>{if(ok)render()});fillDays();shape();redraw();msg('','');dlg.showModal()};
  if(sample){$e('#ai-go').onclick=async()=>{const q=$e('#ai-q').value.trim();if(!q)return;msg('ok','أفكر في الطلب…');
   const M=model(panel).map(d=>({day:d.n,date:d.date,weekday:DAYS_AR[d.wd],sleep_city:d.city,items:d.items.map(x=>x.time+' '+x.title)}));
   const prompt=`You convert a travel-plan change request (Arabic or English) into JSON edit operations. Plan (JSON): ${JSON.stringify(M)}\nAllowed ops: {"op":"move","day":n,"item":"exact item title","to":n,"time":"HH:MM"} | {"op":"time","day":n,"item":"exact item title","time":"HH:MM"} | {"op":"del","day":n,"item":"exact item title"} | {"op":"add","day":n,"time":"HH:MM","title":"Arabic title","note":"short Arabic note"} | {"op":"swap","a":n,"b":n} | {"op":"sleep","day":n,"city":"Arabic city name"}.\nItem titles must be copied exactly from the plan (the text after the time). Do not judge the trip rules; another checker does that. Reply with JSON only: {"ops":[...],"explain":"one short Arabic sentence"}. If the request is unclear, reply {"ops":[],"explain":"Arabic question"}.\nRequest: ${q}`;
