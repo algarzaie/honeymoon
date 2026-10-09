@@ -171,16 +171,18 @@ dialog.shop[open]{animation:shopin .25s ease-out}
 .shop a.note{margin:22px 0 0}
 @media (max-width:480px){.shop .when div{grid-template-columns:1fr;gap:2px}}
 
-/* Hero: a clear photo slideshow of the city we are in (Madrid before the trip), crossfading every 6.5 s */
-.hero{position:relative}
-.slides{position:relative;height:clamp(190px,46vw,320px);border-radius:16px;overflow:hidden;background:var(--line);margin-bottom:18px}
+/* Hero: rotating photos of the current city sit behind the title, under a soft shade so the text stays readable */
+.hero{position:relative;margin:-28px -20px 0;padding:28px 20px 14px;border-radius:0 0 22px 22px;overflow:hidden;isolation:isolate}
+.slides{position:absolute;inset:0;z-index:-2;background:var(--line)}
 .slides .sl{position:absolute;inset:0;background-size:cover;background-position:center;opacity:0;transition:opacity 1.2s ease}
 .slides .sl.on{opacity:1}
-.slides::after{content:"";position:absolute;inset:auto 0 0 0;height:38%;background:linear-gradient(0deg,rgba(0,0,0,.45),transparent);pointer-events:none}
-.hero-cap{position:absolute;z-index:1;inset-inline-start:12px;bottom:12px;font-family:var(--display);font-size:20px;font-weight:700;color:#fff;text-shadow:0 1px 6px rgba(0,0,0,.5)}
-.dots{position:absolute;z-index:1;inset-inline-end:12px;bottom:16px;display:flex;gap:5px}
-.dots i{width:7px;height:7px;border-radius:50%;background:rgba(255,255,255,.5)}
-.dots i.on{background:#fff}
+.hero::before{content:"";position:absolute;inset:0;z-index:-1;pointer-events:none;background:linear-gradient(180deg,color-mix(in srgb,var(--bg) 42%,transparent) 0%,color-mix(in srgb,var(--bg) 62%,transparent) 45%,color-mix(in srgb,var(--bg) 82%,transparent) 75%,var(--bg) 100%)}
+.hero-cap{position:absolute;z-index:1;inset-inline-start:12px;top:10px;font-size:12px;color:var(--ink);background:color-mix(in srgb,var(--card) 80%,transparent);border-radius:999px;padding:1px 10px}
+.dots{position:absolute;z-index:1;inset-inline-end:14px;top:14px;display:flex;gap:5px}
+.dots i{width:7px;height:7px;border-radius:50%;background:color-mix(in srgb,var(--card) 55%,transparent)}
+.dots i.on{background:var(--card)}
+.hero header,.hero .next{text-shadow:0 0 10px var(--bg),0 0 3px var(--bg)}
+@media (max-width:480px){.hero{margin:-28px -16px 0;padding:28px 16px 12px}}
 @media (prefers-reduced-motion:reduce){.slides .sl{transition:none}}
 /* City inside the date block of every day */
 .dnum em{display:block;font-style:normal;font-family:var(--body);font-size:12px;font-weight:600;color:var(--myrtle);white-space:nowrap;margin-top:1px}
@@ -286,7 +288,7 @@ li.edited{background:color-mix(in srgb,var(--gold-soft) 60%,transparent);border-
 .rate .rother p{margin:4px 0 0;color:var(--muted)}
 .rtoast{position:fixed;inset-inline:16px;bottom:calc(72px + env(safe-area-inset-bottom,0px));z-index:7;background:var(--ink);color:var(--card);border-radius:12px;padding:10px 14px;font-size:14px;text-align:center}
 </style></head><body><div class="wrap" lang="ar" dir="rtl">
-<div class="hero" id="hero"><div class="slides" id="slides" aria-hidden="true"><div class="sl on" style="background-image:url('img/gran_via_1.jpg')"></div><div class="sl"></div><span class="hero-cap" id="hero-cap">مدريد</span><div class="dots" id="dots"></div></div><header><svg viewBox="0 0 100 100" class="star" aria-hidden="true"><g fill="none" stroke="currentColor" stroke-width="2.4"><rect x="22" y="22" width="56" height="56"/><rect x="22" y="22" width="56" height="56" transform="rotate(45 50 50)"/><circle cx="50" cy="50" r="13"/></g><circle cx="50" cy="50" r="4" fill="currentColor"/></svg><div><div class="eyebrow">شهر العسل · 4–18 نوفمبر 2026</div><h1>حاتم ولمياء في إسبانيا</h1><p class="sub">مدريد وبرشلونة وغرناطة وقرطبة وساحل الأندلس، ويوم عبر المضيق في طنجة.</p></div></header>
+<div class="hero" id="hero"><div class="slides" id="slides" aria-hidden="true"><div class="sl on" style="background-image:url('img/gran_via_1.jpg')"></div><div class="sl"></div></div><span class="hero-cap" id="hero-cap" aria-hidden="true">مدريد</span><div class="dots" id="dots" aria-hidden="true"></div><header><svg viewBox="0 0 100 100" class="star" aria-hidden="true"><g fill="none" stroke="currentColor" stroke-width="2.4"><rect x="22" y="22" width="56" height="56"/><rect x="22" y="22" width="56" height="56" transform="rotate(45 50 50)"/><circle cx="50" cy="50" r="13"/></g><circle cx="50" cy="50" r="4" fill="currentColor"/></svg><div><div class="eyebrow">شهر العسل · 4–18 نوفمبر 2026</div><h1>حاتم ولمياء في إسبانيا</h1><p class="sub">مدريد وبرشلونة وغرناطة وقرطبة وساحل الأندلس، ويوم عبر المضيق في طنجة.</p></div></header>
 <div class="toprow"><a class="note top" href="https://github.com/algarzaie/honeymoon/issues/new?title=%D9%85%D9%84%D8%A7%D8%AD%D8%B8%D8%A9%20%D8%B9%D8%A7%D9%85%D8%A9%20%D8%B9%D9%84%D9%89%20%D8%A7%D9%84%D8%B1%D8%AD%D9%84%D8%A9" target="_blank" rel="noopener">✎ اكتبي ملاحظة عامة</a></div>
 <div class="count" id="count" aria-live="polite"><div><b>4 نوفمبر</b><span>موعد الانطلاق</span></div></div>
 <div class="route" aria-label="المسار"><ol id="route"><li><button type="button" data-i="0" aria-pressed="false"><i>1</i><strong>مدريد</strong><small>4–6 نوفمبر</small></button></li><li><button type="button" data-i="1" aria-pressed="false"><i>2</i><strong>برشلونة</strong><small>6–9 نوفمبر</small></button></li><li><button type="button" data-i="2" aria-pressed="false"><i>3</i><strong>غرناطة</strong><small>9–11 نوفمبر</small></button></li><li><button type="button" data-i="3" aria-pressed="false"><i>4</i><strong>قرطبة</strong><small>11–13 نوفمبر</small></button></li><li><button type="button" data-i="4" aria-pressed="false"><i>5</i><strong>ماربيا</strong><small>13–17 نوفمبر</small></button></li><li><button type="button" data-i="5" aria-pressed="false"><i>6</i><strong>مدريد ثم الرياض</strong><small>17–18 نوفمبر</small></button></li></ol></div></div>
