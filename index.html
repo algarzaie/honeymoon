@@ -186,6 +186,10 @@ dialog.shop[open]{animation:shopin .25s ease-out}
 .shop .srch input{width:100%;box-sizing:border-box;font:inherit;font-size:16px;padding:10px 14px;border-radius:12px;border:1px solid var(--line);background:var(--card);color:var(--ink)}
 .shop .srch input:focus-visible{outline:2px solid var(--myrtle);outline-offset:1px}
 .shop .srch small{display:block;color:var(--muted);font-size:12px;margin-top:4px}
+.shop .qchips{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.shop .qchips button{all:unset;cursor:pointer;font-size:13px;padding:3px 10px;border-radius:999px;border:1px solid var(--line);background:var(--card);color:var(--myrtle)}
+.shop .qchips button:focus-visible{outline:2px solid var(--myrtle);outline-offset:1px}
+.shop .res .hnote{margin:6px 0 0}
 .shop .res{display:grid;gap:8px;margin-top:8px}
 .shop .hit{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:10px 12px}
 .shop .hit .hn{display:flex;align-items:center;gap:10px;font-weight:600}
@@ -310,14 +314,68 @@ tick();setInterval(tick,30000);
  const spotHTML=s=>{const cats=ORDER.filter(c=>s.items.some(i=>i.c===c));
   return `<div class="spot" id="spot-${s.id}"><div class="sp-top"><div class="sp-ph"${s.photo?` style="background-image:url('${esc((window.HERO_IMG&&window.HERO_IMG[s.photo])||s.photo)}')"`:''}>${s.photo?'':'🛍️'}</div><div><h4>${esc(s.name)}</h4><p class="sp-meta"><span class="when">${esc(s.date)}</span> · <bdi>${esc(s.hours)}</bdi> · الأحد: ${esc(s.sun)}</p></div></div><p class="sp-note">${esc(s.note)}</p>`+
   cats.map(c=>`<h5>${esc(data.cats[c])}</h5><div class="chips"${s.items.find(i=>i.c===c&&i.d)?' dir="ltr"':''}>`+s.items.filter(i=>i.c===c).map(i=>i.d?`<span>${logo(i)}${esc(i.n)}</span>`:`<span class="txt">${esc(i.n)}</span>`).join('')+'</div>').join('')+map(s.q)+'</div>'};
- box.innerHTML=`<div class="srch"><label for="bq" class="sr">ابحثي عن ماركة</label><input id="bq" type="search" placeholder="ابحثي عن ماركة أو منتج: Zara، Maje، زيت الأرغان…" autocomplete="off"><small>${data.spots.length} مكاناً للتسوق في الرحلة، وفي كل مكان ماركاته مقسمة حسب النوع.</small><div class="res" id="bres" aria-live="polite"></div></div>`+
+ box.innerHTML=`<div class="srch"><label for="bq" class="sr">ابحثي عن ماركة أو منتج أو أكلة</label><input id="bq" type="search" placeholder="ابحثي عن ماركة أو منتج أو أكلة: Zara، بهارات، فستان، أكل بحري…" autocomplete="off"><div class="qchips"><button type="button" data-q="بهارات">بهارات</button><button type="button" data-q="فستان">فستان</button><button type="button" data-q="تنورة">تنورة</button><button type="button" data-q="ملابس داخلية">ملابس داخلية</button><button type="button" data-q="أحذية">أحذية</button><button type="button" data-q="حقائب">حقائب</button><button type="button" data-q="عطور">عطور</button><button type="button" data-q="هدايا">هدايا</button><button type="button" data-q="غداء">غداء</button><button type="button" data-q="عشاء">عشاء</button><button type="button" data-q="أكل بحري">أكل بحري</button><button type="button" data-q="أكل محلي">أكل محلي</button><button type="button" data-q="حلال">حلال</button></div><small>${data.spots.length} مكاناً للتسوق ومطاعم كل أيام الرحلة. ابحثي باسم ماركة أو بنوع المنتج أو الأكل.</small><div class="res" id="bres" aria-live="polite"></div></div>`+
   cities.map(c=>`<details class="city"><summary>${esc(c.name)}<small>${esc([...new Set(c.spots.map(s=>s.date))].join(' · '))}</small></summary>${c.spots.map(spotHTML).join('')}</details>`).join('');
  const idx={};data.spots.forEach(s=>s.items.forEach(i=>{const k=norm(i.n);(idx[k]=idx[k]||{it:i,where:[]}).where.push({s,x:i.x})}));
  const keys=Object.keys(idx);const inp=box.querySelector('#bq'),res=box.querySelector('#bres');let t=null;
- inp.addEventListener('input',()=>{clearTimeout(t);t=setTimeout(()=>{const q=norm(inp.value);if(q.length<2){res.innerHTML='';return}
-  const hits=keys.filter(k=>k.includes(q)).sort((a,b)=>(a.startsWith(q)?0:1)-(b.startsWith(q)?0:1)||a.length-b.length).slice(0,12);
-  if(!hits.length){res.innerHTML='<div class="hit">لا توجد نتائج في أماكن رحلتنا.</div>';return}
-  res.innerHTML=hits.map(k=>{const h=idx[k];return `<div class="hit"><div class="hn">${logo(h.it)}<bdi>${esc(h.it.n)}</bdi></div><ul>`+h.where.map(w=>`<li><b>${esc(w.s.name)}</b> · ${esc(w.s.city)}${w.x?` <span>(${esc(w.x)})</span>`:''}<br><span class="when">${esc(w.s.date)}</span> · <span><bdi>${esc(w.s.hours)}</bdi></span>${closedSun(w.s)?' · <span>الأحد مغلق</span>':''}</li>`).join('')+'</ul></div>'}).join('')},150)});
+ /* restaurants from the day programme */
+ const AR_D=['الأحد','الاثنين','الثلاثاء','الأربعاء','الخميس','الجمعة','السبت'];
+ const rests=[];document.querySelectorAll('#p-days details.day').forEach((d,di)=>{const dt=d.dataset.date||'';const wd=dt?AR_D[new Date(dt+'T12:00:00').getDay()]:'';
+  d.querySelectorAll('.food:not(.shop) .meal').forEach(m=>{const meal=m.querySelector('h4')?.textContent.trim()||'';m.querySelectorAll('.rest').forEach(r=>{const ps=[...r.querySelectorAll('p')];
+   rests.push({name:r.querySelector('.rtop b')?.textContent.trim()||'',rk:r.querySelector('.rk')?.textContent.trim()||'',dish:r.querySelector('.dish')?.textContent.trim()||'',halal:r.querySelector('.halal')?.textContent.trim()||'',
+    desc:(ps.filter(p=>!p.matches('.dish,.halal')).pop()||{}).textContent||'',href:r.querySelector('a.map')?.getAttribute('href')||'',meal,day:di+1,date:dt?`${wd} ${+dt.slice(8)} نوفمبر`:'',city:d.dataset.place||''})})})});
+ /* what people ask for, in their own words */
+ const STOP=/^(صيفي|صيفيه|شتوي|شتويه|نسائي|نسائيه|حريمي|للمياء|لي|عن|في|من|ابي|ابغى|اريد|ودي|محل|محلات|متجر|مكان|اين|وين|افضل|حلو|حلوه|جميل|جميله)$/;
+ const C=[
+  {k:['بهارات','توابل','بهار','زعفران','spice','spices','saffron'],re:/توابل|بهارات|زعفران|عطارة/},
+  {k:['لانجيري','لانجيريه','لنجري','ملابسداخليه','ملابسنوم','بيجامه','بيجامات','lingerie','underwear','pyjama'],b:/^(Women'secret|Intimissimi|Calzedonia|Oysho|Victoria's Secret|Simone Pérèle|Etam|Primark|Marks & Spencer|El Corte Inglés)$/,note:{'El Corte Inglés':'قسم الملابس الداخلية'}},
+  {k:['تنوره','تنانير','فستان','فساتين','بلوزه','قميص','بنطلون','جاكيت','معطف','عبايه','ملابس','ازياء','لبس','skirt','dress','dresses','clothes','blouse','jacket','coat'],c:['fashion','department_store']},
+  {k:['حذاء','احذيه','جزمه','كعب','صندل','بوت','shoes','heels','boots','sneakers'],c:['shoes_bags'],re:/أحذية|بلاغي|حذاء/},
+  {k:['حقيبه','حقائب','شنطه','شنط','جزدان','محفظه','bag','bags','handbag','wallet'],c:['shoes_bags'],re:/حقائب|حقيبة|جلد/},
+  {k:['جلد','جلديه','leather'],re:/جلد|جلدية/,b:/^(Loewe|Bimba y Lola|Furla|Coach|Michael Kors|Longchamp|Pikolinos|Tod's|Purificación García)$/},
+  {k:['عطر','عطور','مكياج','ميكب','تجميل','كريم','بشره','عنايه','perfume','makeup','beauty','skincare'],c:['beauty'],re:/عناية|كريم|ماء الورد|الأرغان|صابون/},
+  {k:['مجوهرات','ذهب','فضه','خاتم','عقد','اسواره','ساعه','ساعات','jewelry','jewellery','gold','silver','watch','watches'],c:['jewelry_watches']},
+  {k:['هديه','هدايا','تذكار','تذكاري','سوفنير','gift','gifts','souvenir'],c:['home_gifts','crafts']},
+  {k:['حرف','يدوي','يدويه','سجاد','زربيه','فخار','خزف','فانوس','فوانيس','craft','crafts','rug','rugs','ceramic','pottery'],c:['crafts'],re:/سجاد|فخار|خزف|فوانيس|مصابيح|التطعيم|نسّاجين/},
+  {k:['ارغان','زيتارغان','argan'],re:/الأرغان/},
+  {k:['زيتون','زيتزيتون','olive','olives'],re:/زيتون/},
+  {k:['مكسرات','لوز','فواكهمجففه','زبيب','nuts','almonds'],re:/مكسرات|لوز|فواكه مجففة|زبيب/},
+  {k:['حلويات','شوكولاته','شوكولا','chocolate','sweets'],re:/حلويات/,b:/^(Lindt)$/},
+  {k:['منزل','بيت','اوانيمطبخ','مطبخ','home','kitchen'],c:['home_gifts']},
+  {k:['اطفال','طفل','kids','children'],c:['kids']},
+  {k:['رياضه','رياضي','sport','sports'],c:['sports']},
+  {k:['سوقطعام','اسواقطعام','سوبرماركت','بقاله','market','supermarket'],c:['food']},
+  {k:['غداء','غدا','lunch'],r:x=>x.meal==='الغداء'},
+  {k:['عشاء','عشا','dinner'],r:x=>x.meal==='العشاء'},
+  {k:['مطعم','مطاعم','اكل','اكلات','طعام','restaurant','food'],r:()=>true},
+  {k:['اكلبحري','بحري','بحريه','سمك','اسماك','سردين','جمبري','روبيان','seafood','fish'],r:x=>/بحرية|سمك|أسماك|السردين|جمبري|القاروص|بايلا|الحبار|القد/.test(x.dish+x.halal),re:/أسماك|مأكولات بحرية|قشريات|سمك/},
+  {k:['حلال','halal'],r:x=>/حلال/.test(x.halal)},
+  {k:['محلي','تقليدي','شعبي','اكلمحلي','اكلتقليدي','اكلشعبي','local','traditional'],r:x=>/تقليدي|أندلسي|عريق|كلاسيكي|على طريقة|طنجاوي|قرطبي|مدريدية|مغربي|الأطباق المغربية|Espeto|Salmorejo|السلمورخو|غاثباتشويلو/.test(x.dish+x.desc+x.name),re:/^(أسماك|زيتون|أجبان|توابل|فواكه|عصائر)/},
+  {k:['قهوه','مقهى','كافيه','شاي','coffee','cafe','tea'],r:x=>/مقهى|قهوة|شاي|Café|Caf/i.test(x.name+x.desc),re:/شاي|Tetería/}
+ ];
+ const NC=C.map(c=>({...c,nk:c.k.map(norm)}));
+ function concepts(raw){const words=raw.split(/\s+/).map(norm).filter(w=>w&&!STOP.test(w));const whole=words.join('');if(!whole)return [];const m=[];
+  NC.forEach(c=>{let best='';c.nk.forEach(k=>{if(k.length>=2&&(whole===k||whole.includes(k)||words.some(w=>w.length>=3&&k.startsWith(w)))&&k.length>best.length)best=k});if(best)m.push({c,best})});
+  return m.filter(a=>!m.some(b=>b!==a&&b.best.length>a.best.length&&b.best.includes(a.best))).map(a=>a.c)}
+ const PIN2=document.querySelector('a.map svg')?.outerHTML||'';
+ const restCard=x=>`<div class="hit"><div class="hn"><i class="logo">🍽️</i><bdi>${esc(x.name)}</bdi></div><ul><li><span class="when">${esc(x.meal)} · اليوم ${x.day} · ${esc(x.date)}</span> · <span>${esc(x.city)}</span>${x.rk?` · <span>${esc(x.rk)}</span>`:''}<br><b>${esc(x.dish)}</b><br><span>${esc(x.halal)}</span>${x.href?`<br><a class="map" href="${esc(x.href)}" target="_blank" rel="noopener">${PIN2}<span>الموقع على خرائط Google</span></a>`:''}</li></ul></div>`;
+ const spotCard=(s,its)=>{const max=14;const shown=its.slice(0,max);return `<div class="hit"><div class="hn"><i class="logo">🛍️</i><span>${esc(s.name)} · ${esc(s.city)}</span></div><ul><li><span class="when">${esc(s.date)}</span> · <span><bdi>${esc(s.hours)}</bdi></span>${closedSun(s)?' · <span>الأحد مغلق</span>':''}<div class="chips" style="margin-top:6px"${shown.some(i=>i.d)?' dir="ltr"':''}>`+shown.map(i=>i.d?`<span>${logo(i)}${esc(i.n)}${i.note?` · ${esc(i.note)}`:''}</span>`:`<span class="txt">${esc(i.n)}</span>`).join('')+(its.length>max?`<span class="txt">+${its.length-max}</span>`:'')+'</div></li></ul></div>'};
+ const TIER={high_street:0,local:0,premium:1,luxury:2,'':1};
+ function conceptHTML(cs){let html='';const rs=new Map(),sp=new Map();
+  cs.forEach(c=>{if(c.r)rests.filter(c.r).forEach(x=>rs.set(x.name+'|'+x.day+'|'+x.meal,x));
+   if(c.re||c.c||c.b)data.spots.forEach(s=>s.items.forEach(i=>{const hit=(c.re&&c.re.test(i.n))||(c.c&&c.c.includes(i.c))||(c.b&&c.b.test(i.n));if(!hit)return;const L=sp.get(s)||new Map();L.set(i.n,{...i,note:c.note&&c.note[i.n]||''});sp.set(s,L)}))});
+  const rl=[...rs.values()].sort((a,b)=>a.day-b.day||(a.meal==='الغداء'?0:1)-(b.meal==='الغداء'?0:1));
+  if(rl.length)html+=`<p class="hnote">مطاعم من برنامجنا (${rl.length})</p>`+rl.slice(0,40).map(restCard).join('');
+  if(sp.size)html+=`<p class="hnote">أماكن التسوق (${sp.size})</p>`+[...sp.entries()].map(([s,L])=>spotCard(s,[...L.values()].sort((a,b)=>(TIER[a.t]??1)-(TIER[b.t]??1)))).join('');
+  return html}
+ function brandHTML(q){const hits=keys.filter(k=>k.includes(q)).sort((a,b)=>(a.startsWith(q)?0:1)-(b.startsWith(q)?0:1)||a.length-b.length).slice(0,12);
+  return hits.map(k=>{const h=idx[k];return `<div class="hit"><div class="hn">${logo(h.it)}<bdi>${esc(h.it.n)}</bdi></div><ul>`+h.where.map(w=>`<li><b>${esc(w.s.name)}</b> · ${esc(w.s.city)}${w.x?` <span>(${esc(w.x)})</span>`:''}<br><span class="when">${esc(w.s.date)}</span> · <span><bdi>${esc(w.s.hours)}</bdi></span>${closedSun(w.s)?' · <span>الأحد مغلق</span>':''}</li>`).join('')+'</ul></div>'}).join('')}
+ function freeHTML(q){const rl=rests.filter(x=>norm(x.name+x.dish+x.desc).includes(q));return rl.slice(0,20).map(restCard).join('')}
+ function run(){const raw=inp.value.trim(),q=norm(raw);if(q.length<2){res.innerHTML='';return}
+  const cs=concepts(raw);let html=brandHTML(q);if(cs.length)html=conceptHTML(cs)+html;else if(!html)html=freeHTML(q);
+  res.innerHTML=html||'<div class="hit">لا توجد نتائج في أماكن رحلتنا. جربي كلمة أخرى، مثل: فستان، عطور، هدايا، غداء.</div>'}
+ inp.addEventListener('input',()=>{clearTimeout(t);t=setTimeout(run,150)});
+ box.querySelectorAll('[data-q]').forEach(b=>b.addEventListener('click',()=>{inp.value=b.dataset.q;run();inp.focus()}));
 })();
 
 /* ===== Trip editor with the trip-rules engine (owner only) ===== */
