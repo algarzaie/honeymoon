@@ -246,6 +246,33 @@ dialog.ed::backdrop{background:rgba(10,20,22,.45)}
 .ed .sec{border-top:1px solid var(--line);padding-top:10px}
 .ed .sec h3{font-size:18px;color:var(--myrtle);margin-bottom:6px}
 li.edited{background:color-mix(in srgb,var(--gold-soft) 60%,transparent);border-radius:8px}
+
+/* Ratings journal and past days */
+.pastbtn{all:unset;cursor:pointer;color:var(--myrtle);font-weight:600;font-size:14px;padding:2px 10px;border-radius:999px;box-shadow:inset 0 0 0 1px var(--line)}
+.pastbtn:focus-visible{outline:2px solid var(--myrtle);outline-offset:2px}
+.pastbox{display:grid;gap:14px;padding-bottom:14px;margin-bottom:2px;border-bottom:2px dotted var(--line)}
+.pastbox details.day{opacity:.88}
+.rbadge{display:inline-block;margin-top:2px;font-size:13px;font-weight:600;color:var(--gold);background:var(--gold-soft);border-radius:6px;padding:0 8px}
+.rate{margin:0 16px 14px;padding-top:4px;border-top:1px solid var(--line)}
+.rate .fh{font-family:var(--display);font-size:20px;margin:10px 0 4px;color:var(--myrtle)}
+.rate .rnote{margin:2px 0 6px;font-size:13px;color:var(--muted)}
+.rate .rlink{all:unset;cursor:pointer;color:var(--myrtle);font-weight:600;font-size:13px}
+.rate .rwho{display:flex;gap:8px}
+.rate .rwho button{all:unset;cursor:pointer;padding:6px 18px;border-radius:999px;background:var(--myrtle);color:var(--card);font-weight:600}
+.rate .ritems{list-style:none;margin:0;padding:0;display:grid;gap:2px}
+.rate .ritems li{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:4px 0;border-bottom:1px dashed var(--line);font-size:14px}
+.rate .ritems li:last-child{border-bottom:0}
+.stars{display:inline-flex;direction:ltr;flex:none}
+.stars button{all:unset;cursor:pointer;font-size:22px;line-height:1;padding:2px 3px;color:var(--line)}
+.stars button.on{color:var(--gold)}
+.stars button:focus-visible{outline:2px solid var(--myrtle);outline-offset:1px;border-radius:4px}
+.rate .rday{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:6px 12px;margin-top:8px;padding:8px 10px;border-radius:10px;background:var(--gold-soft);font-size:15px}
+.rate .rday small{color:var(--muted);font-size:12px}
+.rate .rtext{display:grid;gap:4px;margin-top:8px;font-size:13px;color:var(--muted)}
+.rate .rtext textarea{font:inherit;font-size:15px;padding:8px 10px;border-radius:10px;border:1px solid var(--line);background:var(--card);color:var(--ink);resize:vertical}
+.rate .rother{margin-top:8px;padding:8px 10px;border-radius:10px;background:var(--myrtle-soft);font-size:14px}
+.rate .rother p{margin:4px 0 0;color:var(--muted)}
+.rtoast{position:fixed;inset-inline:16px;bottom:calc(72px + env(safe-area-inset-bottom,0px));z-index:7;background:var(--ink);color:var(--card);border-radius:12px;padding:10px 14px;font-size:14px;text-align:center}
 </style></head><body><div class="wrap" lang="ar" dir="rtl">
 <div class="hero" id="hero"><div class="hero-bg" id="hero-bg" style="background-image:url('img/gran_via_1.jpg')"></div><span class="hero-cap" id="hero-cap" aria-hidden="true">مدريد</span><header><svg viewBox="0 0 100 100" class="star" aria-hidden="true"><g fill="none" stroke="currentColor" stroke-width="2.4"><rect x="22" y="22" width="56" height="56"/><rect x="22" y="22" width="56" height="56" transform="rotate(45 50 50)"/><circle cx="50" cy="50" r="13"/></g><circle cx="50" cy="50" r="4" fill="currentColor"/></svg><div><div class="eyebrow">شهر العسل · 4–18 نوفمبر 2026</div><h1>حاتم ولمياء في إسبانيا</h1><p class="sub">مدريد وبرشلونة وغرناطة وقرطبة وساحل الأندلس، ويوم عبر المضيق في طنجة.</p></div></header>
 <div class="toprow"><a class="note top" href="https://github.com/algarzaie/honeymoon/issues/new?title=%D9%85%D9%84%D8%A7%D8%AD%D8%B8%D8%A9%20%D8%B9%D8%A7%D9%85%D8%A9%20%D8%B9%D9%84%D9%89%20%D8%A7%D9%84%D8%B1%D8%AD%D9%84%D8%A9" target="_blank" rel="noopener">✎ اكتبي ملاحظة عامة</a></div>
@@ -459,7 +486,7 @@ tick();setInterval(tick,30000);
  let ops=[],store=null,isOwner=false;
  const LS='trip-edits-v1';
  const local={load:async()=>{try{return JSON.parse(localStorage.getItem(LS)||'[]')}catch(e){return []}},save:async v=>{try{localStorage.setItem(LS,JSON.stringify(v))}catch(e){}}};
- function render(){panel.innerHTML=BASE;const bad=[];ops.forEach(o=>{try{apply(panel,o)}catch(e){bad.push(o)}});if(typeof applyFilter==='function')applyFilter();return bad}
+ function render(){panel.innerHTML=BASE;const bad=[];ops.forEach(o=>{try{apply(panel,o)}catch(e){bad.push(o)}});if(typeof applyFilter==='function')applyFilter();window.dispatchEvent(new Event('plan-render'));return bad}
  async function persist(){if(store)await store.save(ops);else await local.save(ops)}
 
  let db=null,sample=null;
@@ -519,5 +546,82 @@ tick();setInterval(tick,30000);
   const prompt=`You convert a travel-plan change request (Arabic or English) into JSON edit operations. Plan (JSON): ${JSON.stringify(M)}\nAllowed ops: {"op":"move","day":n,"item":"exact item title","to":n,"time":"HH:MM"} | {"op":"time","day":n,"item":"exact item title","time":"HH:MM"} | {"op":"del","day":n,"item":"exact item title"} | {"op":"add","day":n,"time":"HH:MM","title":"Arabic title","note":"short Arabic note"} | {"op":"swap","a":n,"b":n} | {"op":"sleep","day":n,"city":"Arabic city name"}.\nItem titles must be copied exactly from the plan (the text after the time). Do not judge the trip rules; another checker does that. Reply with JSON only: {"ops":[...],"explain":"one short Arabic sentence"}. If the request is unclear, reply {"ops":[],"explain":"Arabic question"}.\nRequest: ${q}`;
   try{const r=await sample.json(prompt);if(!r||!Array.isArray(r.ops)||!r.ops.length){msg('bad',esc(r&&r.explain||'لم أفهم الطلب، جرّب صياغة أخرى.'));return}
    msg('ok',esc(r.explain||''));await propose(r.ops)}catch(e){msg('bad',e&&e.code==='rate_limited'?'كثرت الطلبات، حاول بعد قليل.':'تعذّر الاتصال بـ Claude الآن. استخدم النموذج بالأسفل.')}}}
+})();
+
+/* ===== Past days + our ratings journal ===== */
+(async()=>{
+ const panel=document.querySelector('#p-days .panel');if(!panel)return;
+ const qs=new URLSearchParams(location.search);
+ const TODAY=qs.get('today')||new Intl.DateTimeFormat('en-CA',{timeZone:'Europe/Madrid'}).format(new Date());
+ const esc=t=>String(t).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+ const WHO={h:'حاتم',l:'لمياء'};
+ let me=null,state={h:{},l:{}},save=async()=>{},platform='local',canWrite=true;
+
+ /* where ratings live: the Claude page keeps both people's ratings in its shared store; the website keeps them on this device */
+ const LS='trip-ratings-v1',LSW='trip-rater';
+ const lsGet=k=>{try{return localStorage.getItem(k)}catch(e){return null}},lsSet=(k,v)=>{try{localStorage.setItem(k,v)}catch(e){}};
+ if(window.claude&&claude.use){let db=null,user=null;try{[db,user]=await Promise.all([claude.use('db'),claude.use('user')])}catch(e){}
+  if(db&&user){platform='claude';let owner=false;try{owner=await user.isOwner()}catch(e){}me=owner?'h':'l';
+   try{const w=await user.can('data.write');if(w===false)canWrite=false}catch(e){}
+   const col=db.collection('ratings');let pending=null,busy=false;
+   save=async()=>{pending=JSON.parse(JSON.stringify(state[me]));if(busy)return;busy=true;try{while(pending){const v=pending;pending=null;await col.doc(me==='h'?'hatam':'lamia').set({days:v,at:Date.now()})}}catch(e){toast('تعذّر حفظ التقييم الآن.')}busy=false};
+   try{col.onSnapshot(qs2=>{const docs=qs2.docs||[];docs.forEach(d=>{const k=d.id==='hatam'?'h':d.id==='lamia'?'l':null;if(!k)return;if(k===me&&busy)return;state[k]=(d.data()||{}).days||{}});draw()})}catch(e){}}}
+ if(platform==='local'){try{state=Object.assign({h:{},l:{}},JSON.parse(lsGet(LS)||'{}'))}catch(e){}me=lsGet(LSW);save=async()=>lsSet(LS,JSON.stringify(state))}
+
+ let toastT=null;function toast(m){let el=document.getElementById('rate-toast');if(!el){el=document.createElement('div');el.id='rate-toast';el.className='rtoast';el.setAttribute('role','status');document.body.appendChild(el)}el.textContent=m;el.hidden=false;clearTimeout(toastT);toastT=setTimeout(()=>el.hidden=true,2600)}
+
+ const days=()=>[...panel.querySelectorAll('details.day')];
+ const items=d=>{const t=[...d.querySelectorAll(':scope>ol.tl>li b')].map(b=>b.textContent.trim());if(!t.some(x=>/العشاء/.test(x))&&d.querySelector('.food:not(.shop) .meal h4')&&/العشاء/.test(d.querySelector('.food:not(.shop)').textContent))t.push('العشاء');return t};
+ const avg=r=>{const v=Object.values(r||{}).filter(n=>n>0);return v.length?Math.round(v.reduce((a,b)=>a+b,0)/v.length*10)/10:0};
+ const dayScore=e=>e?(e.day||avg(e.items)):0;
+ const stars=(val,attrs,label)=>`<span class="stars" role="radiogroup" aria-label="${esc(label)}">`+[1,2,3,4,5].map(n=>`<button type="button" role="radio" aria-checked="${n===Math.round(val)}" aria-label="${n} من 5" class="${n<=Math.round(val)?'on':''}" ${attrs} data-n="${n}">★</button>`).join('')+'</span>';
+ const show=v=>v?`<b>${v.toFixed(1)}</b> ★`:'—';
+
+ function section(d){const date=d.dataset.date;if(!date||date>TODAY)return '';const its=items(d);const mine=me?(state[me][date]||{items:{},day:null,note:''}):null;const other=me?(me==='h'?'l':'h'):null;
+  const comp=mine?avg(mine.items):0;let h=`<div class="rate" data-date="${date}"><h4 class="fh">⭐ تقييمنا لهذا اليوم</h4>`;
+  if(!me){h+=`<p class="rnote">من يقيّم على هذا الجهاز؟</p><div class="rwho"><button type="button" data-who="h">حاتم</button><button type="button" data-who="l">لمياء</button></div></div>`;return h}
+  h+=`<p class="rnote">تقييم ${WHO[me]}${platform==='local'?` <button type="button" class="rlink" data-switch>(تغيير)</button>`:''}</p><ul class="ritems">`+its.map(t=>`<li><span>${esc(t)}</span>${stars(mine.items[t]||0,`data-item="${esc(t)}"`,t)}</li>`).join('')+'</ul>';
+  const shown=mine.day||comp;
+  h+=`<div class="rday"><span>تقييم اليوم: ${show(shown)}${mine.day?` <small>(معدّل يدوياً${comp?`، والمحسوب ${comp.toFixed(1)}`:''})</small>`:comp?' <small>(محسوب من الفقرات)</small>':''}</span>`+(comp||mine.day?`<span class="radj"><small>تعديل يدوي:</small> ${stars(mine.day||0,'data-day="1"','تعديل تقييم اليوم')}${mine.day?' <button type="button" class="rlink" data-reset>اعتمد المحسوب</button>':''}</span>`:'')+'</div>';
+  if(comp||mine.day||mine.note)h+=`<label class="rtext">ملاحظاتك عن هذا اليوم (إيجابية أو سلبية)<textarea rows="3" data-note>${esc(mine.note||'')}</textarea></label>`;
+  const o=state[other]&&state[other][date];if(o&&(dayScore(o)||o.note))h+=`<div class="rother"><b>${WHO[other]}:</b> ${show(dayScore(o))}${o.note?`<p>${esc(o.note)}</p>`:''}</div>`;
+  const both=[dayScore(state.h[date]),dayScore(state.l[date])].filter(Boolean);if(both.length===2)h+=`<p class="rnote">متوسطنا معاً: ${show((both[0]+both[1])/2)}</p>`;
+  return h+'</div>'}
+
+ function draw(){const old=document.activeElement&&document.activeElement.matches('textarea[data-note]')?{date:document.activeElement.closest('.rate').dataset.date,v:document.activeElement.value,s:document.activeElement.selectionStart}:null;
+  days().forEach(d=>{d.querySelectorAll(':scope>.rate').forEach(x=>x.remove());const html=section(d);if(!html)return;const anchor=d.querySelector(':scope>.sleep')||d.querySelector(':scope>a.note');const tmp=document.createElement('div');tmp.innerHTML=html;anchor?d.insertBefore(tmp.firstChild,anchor):d.appendChild(tmp.firstChild);
+   const sc=dayScore(me&&state[me][d.dataset.date]);let badge=d.querySelector('summary .rbadge');if(sc){if(!badge){badge=document.createElement('span');badge.className='rbadge';d.querySelector('summary .dhead').appendChild(badge)}badge.textContent=sc.toFixed(1)+' ★'}else if(badge)badge.remove()});
+  if(old){const ta=panel.querySelector(`.rate[data-date="${old.date}"] textarea[data-note]`);if(ta){ta.focus();ta.value=old.v;try{ta.setSelectionRange(old.s,old.s)}catch(e){}}}
+  arrangePast();journalBtn()}
+
+ /* finished days move behind a "past days" button so today is on top */
+ function arrangePast(){const bar=document.querySelector('#p-days .filterbar');if(!bar)return;let box=panel.querySelector(':scope>.pastbox');const past=days().filter(d=>d.dataset.date&&d.dataset.date<TODAY);
+  let btn=bar.querySelector('#pastbtn');if(!past.length){if(btn)btn.remove();if(box)box.remove();return}
+  if(!box){box=document.createElement('div');box.className='pastbox';box.hidden=lsGet('show-past')!=='1';panel.insertBefore(box,panel.firstChild)}
+  past.forEach(d=>{if(d.parentNode!==box){box.appendChild(d);d.open=false}});
+  if(!btn){btn=document.createElement('button');btn.type='button';btn.id='pastbtn';btn.className='pastbtn';bar.insertBefore(btn,bar.lastElementChild);btn.onclick=()=>{box.hidden=!box.hidden;lsSet('show-past',box.hidden?'0':'1');label()}}
+  const label=()=>{btn.textContent=(box.hidden?'🕘 الأيام الماضية ':'🕘 إخفاء الأيام الماضية ')+`(${past.length})`;btn.setAttribute('aria-expanded',String(!box.hidden))};label()}
+
+ /* journal: copy or share the ratings as text */
+ function journalText(who){const lines=[`يوميات رحلتنا · ${WHO[who]}`,''];days().forEach(d=>{const e=state[who][d.dataset.date];if(!e)return;const sc=dayScore(e);if(!sc&&!e.note)return;
+   lines.push(`${d.querySelector('summary .dnum b')?.textContent||''} نوفمبر · ${d.querySelector('summary h3')?.textContent||''} · ${sc?sc.toFixed(1)+'★':''}`);Object.entries(e.items||{}).forEach(([k,v])=>{if(v)lines.push(`  - ${k}: ${'★'.repeat(v)}`)});if(e.note)lines.push('  ملاحظات: '+e.note);lines.push('')});return lines.join('\n')}
+ function journalBtn(){const bar=document.querySelector('#p-days .filterbar');if(!bar||!me)return;const any=Object.keys(state[me]||{}).length;let b=bar.querySelector('#jbtn');if(!any){if(b)b.remove();return}
+  if(!b){b=document.createElement('button');b.type='button';b.id='jbtn';b.className='pastbtn';b.textContent='📔 يومياتي';bar.insertBefore(b,bar.lastElementChild);
+   b.onclick=async()=>{const t=journalText(me);if(navigator.share&&platform==='local'){try{await navigator.share({title:'يوميات رحلتنا',text:t});return}catch(e){}}try{await navigator.clipboard.writeText(t);toast('نُسخت اليوميات، يمكنك لصقها في أي مكان.')}catch(e){window.open('https://wa.me/?text='+encodeURIComponent(t),'_blank','noopener')}}}}
+
+ /* interactions */
+ const deb={};
+ panel.addEventListener('click',async e=>{const w=e.target.closest('[data-who]');if(w){me=w.dataset.who;lsSet(LSW,me);draw();return}
+  if(e.target.closest('[data-switch]')){me=me==='h'?'l':'h';lsSet(LSW,me);draw();return}
+  const r=e.target.closest('.rate');if(!r||!me)return;if(!canWrite){toast('لا تملك صلاحية الحفظ في هذه الصفحة.');return}
+  const date=r.dataset.date;const s=state[me][date]=state[me][date]||{items:{},day:null,note:''};const b=e.target.closest('.stars button');
+  if(b&&b.dataset.item){const n=+b.dataset.n;s.items[b.dataset.item]=s.items[b.dataset.item]===n?0:n}
+  else if(b&&b.dataset.day){const n=+b.dataset.n;s.day=s.day===n?null:n}
+  else if(e.target.closest('[data-reset]'))s.day=null;else return;
+  s.at=Date.now();draw();save()});
+ panel.addEventListener('input',e=>{const ta=e.target.closest('textarea[data-note]');if(!ta||!me||!canWrite)return;const date=ta.closest('.rate').dataset.date;const s=state[me][date]=state[me][date]||{items:{},day:null,note:''};s.note=ta.value;s.at=Date.now();clearTimeout(deb[date]);deb[date]=setTimeout(save,700)});
+ panel.addEventListener('toggle',e=>{if(e.target.matches&&e.target.matches('details.day')&&e.target.open)return},true);
+ window.addEventListener('plan-render',draw);
+ draw();
 })();
 </script></body></html>
