@@ -241,6 +241,12 @@ dialog.ed::backdrop{background:rgba(10,20,22,.45)}
 .ed button.b.alt{background:transparent;color:var(--myrtle);box-shadow:inset 0 0 0 1px var(--myrtle)}
 .ed button.b.warn{background:#B3261E;color:#fff}
 .ed button.b:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+.ed .hint{margin:0;font-size:13px;color:var(--muted)}
+.ed .sec h3 small{font-family:var(--body);font-size:12px;color:var(--muted);font-weight:400}
+.ed .prop{border:1px solid var(--line);background:var(--card);border-radius:12px;padding:10px 12px;display:grid;gap:6px;margin-bottom:8px}
+.ed .prop .ph{display:flex;flex-wrap:wrap;gap:6px 10px;align-items:baseline;font-size:14px}
+.ed .prop .ph small{color:var(--muted)}
+.ed .prop .st{color:var(--gold);font-weight:600;font-size:13px}
 .ed .msg{border-radius:12px;padding:10px 12px;font-size:14px}
 .ed .msg.ok{background:var(--myrtle-soft)}
 .ed .msg.bad{background:#FBE9E7;color:#5F1A12}
@@ -491,70 +497,113 @@ tick();setInterval(tick,30000);
    const s=d.querySelector('.sleep');if(s)s.innerHTML=`نبيت الليلة في: <b>${esc(o.city.trim())}</b> <small>(يُحدَّد الفندق)</small>`;return}}
  const say=o=>({move:`نقل «${o.item}» من اليوم ${o.day} إلى اليوم ${o.to} الساعة ${o.time}`,time:`تغيير وقت «${o.item}» يوم ${o.day} إلى ${o.time}`,del:`حذف «${o.item}» من اليوم ${o.day}`,add:`إضافة «${o.title}» يوم ${o.day} الساعة ${o.time}`,swap:`تبديل برنامج اليوم ${o.a} واليوم ${o.b}`,sleep:`المبيت ليلة اليوم ${o.day} في ${o.city}`}[o.op]||o.op);
 
- /* where edits are kept: the Claude page keeps them in its shared store; the website keeps them in this browser */
- let ops=[],store=null,isOwner=false;
- const LS='trip-edits-v1';
- const local={load:async()=>{try{return JSON.parse(localStorage.getItem(LS)||'[]')}catch(e){return []}},save:async v=>{try{localStorage.setItem(LS,JSON.stringify(v))}catch(e){}}};
- function render(){panel.innerHTML=BASE;const bad=[];ops.forEach(o=>{try{apply(panel,o)}catch(e){bad.push(o)}});if(typeof applyFilter==='function')applyFilter();window.dispatchEvent(new Event('plan-render'));return bad}
- async function persist(){if(store)await store.save(ops);else await local.save(ops)}
+ /* Three layers: the approved plan (everyone), proposals waiting for Hatam, and this person's own try-out draft (this device only) */
+ let approved=[],draft=[],props=[],preview=null,isOwner=false,platform='site',db=null,sample=null;
+ const LSD='trip-draft-v1',LSS='trip-submitted-v1';
+ const lsJ=(k,d)=>{try{return JSON.parse(localStorage.getItem(k)||'')}catch(e){return d}},lsW=(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}};
+ const REPO='algarzaie/honeymoon',TAG='[اقتراح تعديل]';
+ function render(){panel.innerHTML=BASE;const bad=[];const layer=(list,cls)=>list.forEach(o=>{try{apply(panel,o)}catch(e){bad.push(o)}});
+  layer(approved);const pv=props.find(p=>p.id===preview);if(pv)layer(pv.ops);layer(draft);
+  if(typeof applyFilter==='function')applyFilter();window.dispatchEvent(new Event('plan-render'));drawBanner();return bad}
 
- let db=null,sample=null;
- if(window.claude&&claude.use){try{const user=await claude.use('user');isOwner=!!(user&&user.isOwner&&user.isOwner())}catch(e){}
-  try{db=await claude.use('db')}catch(e){}
-  if(db){const doc=db.doc('plan/edits');store={load:async()=>{try{const s=await doc.get();return (s&&s.exists&&s.data()?.ops)||[]}catch(e){return []}},save:async v=>{await doc.set({ops:v,at:Date.now()})}};
-   try{doc.onSnapshot(s=>{const v=(s&&s.exists&&s.data()?.ops)||[];if(JSON.stringify(v)!==JSON.stringify(ops)){ops=v;render();try{drawLog()}catch(e){}}})}catch(e){}}
+ const qp=new URLSearchParams(location.search);
+ if(window.claude&&claude.use){try{const user=await claude.use('user');if(user){platform='claude';isOwner=!!(await user.isOwner())}}catch(e){}
+  try{db=await claude.use('db')}catch(e){}if(!db)platform='site';
   if(isOwner){try{sample=await claude.use('sample')}catch(e){}}}
- const qp=new URLSearchParams(location.search);try{if(qp.get('edit')==='1')localStorage.setItem('trip-editor','1');if(qp.get('edit')==='0')localStorage.removeItem('trip-editor')}catch(e){}
- let editorOn=isOwner;try{editorOn=editorOn||localStorage.getItem('trip-editor')==='1'}catch(e){}
- ops=await (store||local).load();if(ops.length)render();
- if(!editorOn)return;
+ if(platform==='site'){try{if(qp.get('owner')==='1')localStorage.setItem('trip-owner','1');if(qp.get('owner')==='0')localStorage.removeItem('trip-owner');isOwner=localStorage.getItem('trip-owner')==='1'}catch(e){}}
+ const ME=isOwner?'حاتم':'لمياء';
+ draft=lsJ(LSD,[])||[];const legacy=lsJ('trip-edits-v1',null);if(Array.isArray(legacy)&&legacy.length&&!draft.length){draft=legacy;lsW(LSD,draft)}try{localStorage.removeItem('trip-edits-v1')}catch(e){}
+ const saveDraft=()=>lsW(LSD,draft);
 
- /* the editor dialog */
- const btn=document.createElement('button');btn.type='button';btn.className='edbtn';btn.textContent='✎ تعديل الرحلة';document.body.appendChild(btn);
+ /* the Claude page: approved plan and proposals live in the page's shared store */
+ if(platform==='claude'){const planDoc=db.doc('plan/edits'),col=db.collection('proposals');
+  try{const s=await planDoc.get();approved=(s&&s.exists&&s.data()?.ops)||[]}catch(e){}
+  try{planDoc.onSnapshot(s=>{const v=(s&&s.exists&&s.data()?.ops)||[];if(JSON.stringify(v)!==JSON.stringify(approved)){approved=v;render();try{redraw()}catch(e){}}})}catch(e){}
+  try{col.onSnapshot(q=>{props=(q.docs||[]).map(d=>({id:d.id,...(d.data()||{})})).filter(p=>p.status==='pending').sort((a,b)=>a.at-b.at);render();try{redraw()}catch(e){}})}catch(e){}}
+
+ /* the website: proposals are GitHub Issues; Hatam closes one as "completed" to approve it, "not planned" to reject */
+ async function loadIssues(force){const ck='trip-issues-cache';let list=null;try{const c=JSON.parse(sessionStorage.getItem(ck)||'null');if(!force&&c&&Date.now()-c.t<300000)list=c.v}catch(e){}
+  if(!list){try{const r=await fetch(`https://api.github.com/repos/${REPO}/issues?state=all&per_page=100&sort=created&direction=asc`,{headers:{Accept:'application/vnd.github+json'}});if(r.ok){list=(await r.json()).filter(i=>!i.pull_request&&String(i.title||'').startsWith(TAG)).map(i=>{let j=null;const m=/```json\s*([\s\S]*?)```/.exec(i.body||'');try{j=JSON.parse(m[1])}catch(e){}return j&&Array.isArray(j.ops)?{id:j.id||String(i.number),num:i.number,url:i.html_url,who:j.who||'',ops:j.ops,at:Date.parse(i.created_at),state:i.state,reason:i.state_reason,closed:Date.parse(i.closed_at||0)}:null}).filter(Boolean);try{sessionStorage.setItem(ck,JSON.stringify({t:Date.now(),v:list}))}catch(e){}}}catch(e){}}
+  if(!list)return false;
+  approved=list.filter(i=>i.state==='closed'&&i.reason==='completed').sort((a,b)=>a.closed-b.closed).flatMap(i=>i.ops);
+  const sub=(lsJ(LSS,[])||[]).filter(s=>!list.some(i=>i.id===s.id)&&Date.now()-s.at<7*864e5);lsW(LSS,sub);
+  props=list.filter(i=>i.state==='open').concat(sub.map(s=>({...s,local:true})));return true}
+ if(platform==='site'){await loadIssues(false)}
+ render();
+
+ /* the editor: everyone can try changes; Lamia's go to Hatam for approval */
+ const btn=document.createElement('button');btn.type='button';btn.className='edbtn';btn.textContent=isOwner?'✎ تعديل الرحلة':'✎ جرّبي تعديل الرحلة';document.body.appendChild(btn);
  const dlg=document.createElement('dialog');dlg.className='ed';dlg.setAttribute('dir','rtl');dlg.setAttribute('lang','ar');
- dlg.innerHTML=`<div class="eh"><h2>تعديل الرحلة</h2><button type="button" class="b alt" data-x>إغلاق</button></div><div class="eb">
+ dlg.innerHTML=`<div class="eh"><h2>${isOwner?'تعديل الرحلة':'جرّبي تعديل الرحلة'}</h2><button type="button" class="b alt" data-x>إغلاق</button></div><div class="eb">
+ <p class="hint">${isOwner?'جرّب أي تعديل وشاهده في البرنامج فوراً، ثم اعتمده ليظهر للجميع.':'جرّبي أي تعديل وشاهديه في البرنامج فوراً على جهازك. وحين يعجبك، أرسليه لحاتم ليوافق عليه.'}</p>
  ${sample?`<div><label>اكتب التعديل بكلامك<textarea id="ai-q" rows="2" placeholder="مثال: انقل ركوب الخيل إلى يوم 15 الساعة 17:00"></textarea></label><div class="btns" style="margin-top:6px"><button type="button" class="b" id="ai-go">اقترح التعديل</button></div></div><div class="sec"></div>`:''}
  <label>نوع التعديل<select id="e-op"><option value="move">نقل نشاط إلى يوم آخر</option><option value="time">تغيير وقت نشاط</option><option value="add">إضافة نشاط</option><option value="del">حذف نشاط</option><option value="swap">تبديل برنامج يومين</option><option value="sleep">تغيير مدينة المبيت</option></select></label>
  <div class="row"><label id="l-day">اليوم<select id="e-day"></select></label><label id="l-to">إلى اليوم<select id="e-to"></select></label></div>
  <label id="l-item">النشاط<select id="e-item"></select></label>
  <div class="row"><label id="l-time">الوقت<input id="e-time" type="time" step="300"></label><label id="l-city">المدينة<input id="e-city" list="e-cities"><datalist id="e-cities"></datalist></label></div>
  <label id="l-title">اسم النشاط<input id="e-title"></label>
- <div class="btns"><button type="button" class="b" id="e-go">تحقق وطبّق</button></div>
+ <div class="btns"><button type="button" class="b" id="e-go">تحقق وجرّب</button></div>
  <div id="e-msg"></div>
- <div class="sec"><h3>سجل التعديلات</h3><ol class="log" id="e-log"></ol><div class="btns" style="margin-top:8px"><button type="button" class="b alt" id="e-undo">تراجع عن الأخير</button><button type="button" class="b alt" id="e-reset">العودة إلى الخطة الأصلية</button>${store?'':'<a class="b alt" id="e-send" target="_blank" rel="noopener" style="text-decoration:none">إرسال التعديلات لتثبيتها في الموقع</a>'}</div>
- <p style="font-size:12px;color:var(--muted);margin:8px 0 0">${store?'التعديلات تُحفظ في هذه الصفحة وتظهر لكل من يفتحها.':'التعديلات تظهر في هذا المتصفح فقط. لتثبيتها في الموقع للجميع، اضغط «إرسال التعديلات».'}</p></div></div>`;
+ <div class="sec"><h3>${isOwner?'تجربتك':'تجربتك'} <small>(تظهر لك فقط على هذا الجهاز)</small></h3><ol class="log" id="e-draft"></ol><div class="btns" style="margin-top:8px"><button type="button" class="b" id="e-submit">${isOwner?'اعتمد للجميع':'أرسلي لحاتم للموافقة'}</button><button type="button" class="b alt" id="e-undo">تراجع</button><button type="button" class="b alt" id="e-clear">مسح التجربة</button></div></div>
+ <div class="sec"><h3>بانتظار الموافقة</h3><div id="e-pend"></div></div>
+ <div class="sec"><h3>التعديلات المعتمدة</h3><ol class="log" id="e-log"></ol>${isOwner&&platform==='claude'?'<div class="btns" style="margin-top:8px"><button type="button" class="b alt" id="e-unapprove">تراجع عن آخر تعديل معتمد</button></div>':''}
+ ${isOwner&&platform==='site'?'<p class="hint">للتراجع عن تعديل معتمد: افتح الـ Issue في GitHub وأعد فتحه (Reopen).</p>':''}</div></div>`;
  document.body.appendChild(dlg);const $e=s=>dlg.querySelector(s);
  function fillDays(){const M=model(panel);const opt=M.map(d=>`<option value="${d.n}">اليوم ${d.n} · ${DAYS_AR[d.wd]} ${+d.date.slice(8)} نوفمبر · ${esc(d.place||d.city)}</option>`).join('');
   const keep=[$e('#e-day').value,$e('#e-to').value];$e('#e-day').innerHTML=opt;$e('#e-to').innerHTML=opt;if(keep[0])$e('#e-day').value=keep[0];if(keep[1])$e('#e-to').value=keep[1];
   $e('#e-cities').innerHTML=[...new Set(M.map(d=>d.city))].map(c=>`<option value="${esc(c)}">`).join('');fillItems()}
- function fillItems(){const d=model(panel)[(+$e('#e-day').value||1)-1];$e('#e-item').innerHTML=(d?d.items:[]).map(x=>`<option value="${esc(x.title)}">${esc(x.time)} · ${esc(x.title)}</option>`).join('');
-  syncTime()}
+ function fillItems(){const d=model(panel)[(+$e('#e-day').value||1)-1];$e('#e-item').innerHTML=(d?d.items:[]).map(x=>`<option value="${esc(x.title)}">${esc(x.time)} · ${esc(x.title)}</option>`).join('');syncTime()}
  function syncTime(){const d=model(panel)[(+$e('#e-day').value||1)-1];const it=d&&d.items.find(x=>x.title===$e('#e-item').value);if(it&&$e('#e-op').value!=='add')$e('#e-time').value=it.time}
  function shape(){const op=$e('#e-op').value;const show=(id,on)=>$e(id).hidden=!on;
   show('#l-to',op==='move'||op==='swap');show('#l-item',['move','time','del'].includes(op));show('#l-time',['move','time','add'].includes(op));show('#l-city',op==='sleep');show('#l-title',op==='add');
   $e('#l-to').firstChild.textContent=op==='swap'?'مع اليوم':'إلى اليوم'}
  const read=()=>{const op=$e('#e-op').value,day=+$e('#e-day').value;return op==='swap'?{op,a:day,b:+$e('#e-to').value}:op==='sleep'?{op,day,city:$e('#e-city').value}:op==='add'?{op,day,time:$e('#e-time').value,title:$e('#e-title').value}:op==='move'?{op,day,item:$e('#e-item').value,to:+$e('#e-to').value,time:$e('#e-time').value}:op==='time'?{op,day,item:$e('#e-item').value,time:$e('#e-time').value}:{op,day,item:$e('#e-item').value}};
- function trial(list){const tmp=document.createElement('div');tmp.innerHTML=BASE;[...ops,...list].forEach(o=>apply(tmp,o));return check(model(tmp)).filter(p=>!BASEKEYS.has(p.k)&&!ops.some(o=>(o.ok||[]).includes(p.k)))}
+ const okKeys=()=>[...approved,...draft].flatMap(o=>o.ok||[]);
+ function trial(list){const tmp=document.createElement('div');tmp.innerHTML=BASE;[...approved,...draft,...list].forEach(o=>apply(tmp,o));const ok=okKeys();return check(model(tmp)).filter(p=>!BASEKEYS.has(p.k)&&!ok.includes(p.k))}
  const msg=(cls,html)=>{$e('#e-msg').innerHTML=html?`<div class="msg ${cls}">${html}</div>`:''};
- async function commit(list,forced){list.forEach(o=>{if(forced)o.ok=forced});ops=ops.concat(list);render();await persist();drawLog();fillDays();msg('ok','تم التعديل ✓ '+list.map(o=>esc(say(o))).join('، '))}
- async function propose(list){msg('','');let probs;try{probs=trial(list)}catch(e){msg('bad',esc(e.message));return}
-  if(!probs.length){await commit(list);return}
-  $e('#e-msg').innerHTML=`<div class="msg bad"><b>لم أطبّق التعديل لأنه يخالف قواعد الرحلة:</b><ul>${probs.map(p=>`<li>${esc(p.msg)}</li>`).join('')}</ul><div class="btns" style="margin-top:8px"><button type="button" class="b warn" id="e-force">طبّقه كاستثناء</button><button type="button" class="b alt" id="e-cancel">إلغاء</button></div></div>`;
-  $e('#e-force').onclick=()=>commit(list,probs.map(p=>p.k));$e('#e-cancel').onclick=()=>msg('','')}
- function drawLog(){if(!dlg.isConnected)return;$e('#e-log').innerHTML=ops.length?ops.map(o=>`<li>${esc(say(o))}${o.ok?' <span class="ex">(استثناء)</span>':''}</li>`).join(''):'<li>لا تعديلات بعد.</li>';
-  const s=$e('#e-send');if(s){const body='تعديلات من صفحة الرحلة. يرجى تثبيتها في الموقع:\n\n'+ops.map((o,i)=>`${i+1}. ${say(o)}${o.ok?' (استثناء)':''}`).join('\n')+'\n\n```json\n'+JSON.stringify(ops)+'\n```';
-   s.href='https://github.com/algarzaie/honeymoon/issues/new?title='+encodeURIComponent('تعديلات على برنامج الرحلة')+'&body='+encodeURIComponent(body)}}
+ function addDraft(list,forced){list.forEach(o=>{if(forced)o.ok=forced});draft=draft.concat(list);saveDraft();preview=null;render();redraw();fillDays();msg('ok','جرّبتُ التعديل ✓ '+list.map(o=>esc(say(o))).join('، ')+'. يظهر الآن في البرنامج على جهازك.')}
+ function propose(list){msg('','');let probs;try{probs=trial(list)}catch(e){msg('bad',esc(e.message));return}
+  if(!probs.length){addDraft(list);return}
+  $e('#e-msg').innerHTML=`<div class="msg bad"><b>هذا التعديل يخالف قواعد الرحلة:</b><ul>${probs.map(p=>`<li>${esc(p.msg)}</li>`).join('')}</ul><div class="btns" style="margin-top:8px"><button type="button" class="b warn" id="e-force">جرّبه كاستثناء</button><button type="button" class="b alt" id="e-cancel">إلغاء</button></div></div>`;
+  $e('#e-force').onclick=()=>addDraft(list,probs.map(p=>p.k));$e('#e-cancel').onclick=()=>msg('','')}
+ const li=o=>`<li>${esc(say(o))}${o.ok?' <span class="ex">(استثناء)</span>':''}</li>`;
+ const when=t=>t?new Date(t).toLocaleString('ar',{day:'numeric',month:'long',hour:'2-digit',minute:'2-digit'}):'';
+ function redraw(){if(!dlg.isConnected)return;
+  $e('#e-draft').innerHTML=draft.length?draft.map(li).join(''):'<li>لا تجربة بعد.</li>';$e('#e-submit').disabled=!draft.length;$e('#e-submit').style.opacity=draft.length?1:.5;
+  $e('#e-log').innerHTML=approved.length?approved.map(li).join(''):'<li>لا تعديلات معتمدة بعد. البرنامج كما خُطط له.</li>';
+  $e('#e-pend').innerHTML=props.length?props.map(p=>`<div class="prop"><div class="ph"><b>من ${esc(p.who||'')}</b> <small>${esc(when(p.at))}</small> <span class="st">⏳ بانتظار موافقة حاتم</span></div><ol class="log">${(p.ops||[]).map(li).join('')}</ol><div class="btns">`+
+   `<button type="button" class="b alt" data-pv="${esc(p.id)}">${preview===p.id?'إلغاء المعاينة':'معاينة في البرنامج'}</button>`+
+   (isOwner?(platform==='claude'?`<button type="button" class="b" data-ok="${esc(p.id)}">موافقة</button><button type="button" class="b warn" data-no="${esc(p.id)}">رفض</button>`:p.url?`<a class="b" href="${esc(p.url)}" target="_blank" rel="noopener" style="text-decoration:none">موافقة أو رفض في GitHub</a>`:'<small>يظهر رابط الموافقة بعد دقائق</small>'):'')+'</div></div>').join('')+(isOwner&&platform==='site'&&props.some(p=>p.url)?'<p class="hint">للموافقة: أغلق الـ Issue كـ «Close as completed». للرفض: «Close as not planned». يتحدّث الموقع للجميع خلال دقائق.</p>':''):'<p class="hint">لا يوجد شيء بانتظار الموافقة.</p>'}
+ function drawBanner(){const bar=document.querySelector('#p-days .filterbar');if(!bar)return;let b=bar.querySelector('#pendbtn');const n=props.length+(draft.length?1:0);
+  if(!n){if(b)b.remove();return}if(!b){b=document.createElement('button');b.type='button';b.id='pendbtn';b.className='pastbtn';bar.insertBefore(b,bar.lastElementChild);b.onclick=()=>btn.click()}
+  b.textContent=props.length?`⏳ بانتظار الموافقة (${props.length})`:'✎ عندك تجربة غير مرسلة'}
+ async function submit(){if(!draft.length)return;const id=Math.random().toString(36).slice(2,10);const ops=draft.slice();
+  if(platform==='claude'){try{if(isOwner){approved=approved.concat(ops);await db.doc('plan/edits').set({ops:approved,at:Date.now()})}else{await db.collection('proposals').doc(id).set({who:ME,ops,status:'pending',at:Date.now()})}}catch(e){msg('bad','تعذّر الحفظ الآن. حاول مرة أخرى.');return}
+   draft=[];saveDraft();render();redraw();msg('ok',isOwner?'اعتُمد التعديل وظهر للجميع ✓':'أُرسل لحاتم ✓ يظهر عندك «بانتظار الموافقة» حتى يوافق.');return}
+  const lines=ops.map((o,i)=>`${i+1}. ${say(o)}${o.ok?' (استثناء)':''}`).join('\n');
+  const body=`اقتراح تعديل على برنامج الرحلة من ${ME}:\n\n${lines}\n\nللموافقة: أغلق هذا الـ Issue كـ «Close as completed». للرفض: «Close as not planned».\n\n\`\`\`json\n${JSON.stringify({v:1,id,who:ME,ops})}\n\`\`\``;
+  window.open(`https://github.com/${REPO}/issues/new?title=${encodeURIComponent(TAG+' من '+ME)}&body=${encodeURIComponent(body)}`,'_blank','noopener');
+  const sub=lsJ(LSS,[])||[];sub.push({id,who:ME,ops,at:Date.now()});lsW(LSS,sub);props.push({id,who:ME,ops,at:Date.now(),local:true});draft=[];saveDraft();render();redraw();
+  msg('ok',isOwner?'فُتحت صفحة GitHub. اضغط «Submit new issue»، ثم أغلقه كـ «Close as completed» ليظهر التعديل للجميع.':'فُتحت صفحة GitHub. اضغطي «Submit new issue» ليصل الاقتراح لحاتم. يظهر عندك «بانتظار الموافقة» حتى يوافق.')}
+ dlg.addEventListener('click',async e=>{const t=e.target.closest('button');if(!t)return;
+  if(t.dataset.pv!==undefined){preview=preview===t.dataset.pv?null:t.dataset.pv;render();redraw();if(preview)dlg.close();return}
+  const p=props.find(x=>x.id===(t.dataset.ok||t.dataset.no));if(!p||platform!=='claude'||!isOwner)return;
+  try{if(t.dataset.ok){approved=approved.concat(p.ops);await db.doc('plan/edits').set({ops:approved,at:Date.now()});await db.collection('proposals').doc(p.id).update({status:'approved',decidedAt:Date.now()});msg('ok','وافقتَ على الاقتراح وصار في البرنامج للجميع ✓')}
+   else{await db.collection('proposals').doc(p.id).update({status:'rejected',decidedAt:Date.now()});msg('ok','رُفض الاقتراح.')}}catch(err){msg('bad','تعذّر الحفظ الآن.')}
+  if(preview===p.id)preview=null;render();redraw()});
  $e('#e-op').onchange=()=>{shape();fillItems()};$e('#e-day').onchange=fillItems;$e('#e-item').onchange=syncTime;
  $e('#e-go').onclick=()=>propose([read()]);
- $e('#e-undo').onclick=async()=>{if(!ops.length)return;const o=ops.pop();render();await persist();drawLog();fillDays();msg('ok','تم التراجع عن: '+esc(say(o)))};
- $e('#e-reset').onclick=async()=>{if(!ops.length)return;if(!confirm('حذف كل التعديلات والعودة إلى الخطة الأصلية؟'))return;ops=[];render();await persist();drawLog();fillDays();msg('ok','عادت الخطة الأصلية.')};
+ $e('#e-submit').onclick=submit;
+ $e('#e-undo').onclick=()=>{if(!draft.length)return;const o=draft.pop();saveDraft();render();redraw();fillDays();msg('ok','تم التراجع عن: '+esc(say(o)))};
+ $e('#e-clear').onclick=()=>{if(!draft.length)return;draft=[];saveDraft();render();redraw();fillDays();msg('ok','مُسحت التجربة، وعاد البرنامج كما هو.')};
+ const un=$e('#e-unapprove');if(un)un.onclick=async()=>{if(!approved.length)return;if(!confirm('التراجع عن آخر تعديل معتمد للجميع؟'))return;approved=approved.slice(0,-1);try{await db.doc('plan/edits').set({ops:approved,at:Date.now()})}catch(e){}render();redraw();fillDays()};
  dlg.querySelector('[data-x]').onclick=()=>dlg.close();dlg.addEventListener('click',e=>{if(e.target===dlg)dlg.close()});
- btn.onclick=()=>{fillDays();shape();drawLog();msg('','');dlg.showModal()};
+ btn.onclick=async()=>{if(platform==='site')await loadIssues(true).then(ok=>{if(ok)render()});fillDays();shape();redraw();msg('','');dlg.showModal()};
  if(sample){$e('#ai-go').onclick=async()=>{const q=$e('#ai-q').value.trim();if(!q)return;msg('ok','أفكر في الطلب…');
   const M=model(panel).map(d=>({day:d.n,date:d.date,weekday:DAYS_AR[d.wd],sleep_city:d.city,items:d.items.map(x=>x.time+' '+x.title)}));
   const prompt=`You convert a travel-plan change request (Arabic or English) into JSON edit operations. Plan (JSON): ${JSON.stringify(M)}\nAllowed ops: {"op":"move","day":n,"item":"exact item title","to":n,"time":"HH:MM"} | {"op":"time","day":n,"item":"exact item title","time":"HH:MM"} | {"op":"del","day":n,"item":"exact item title"} | {"op":"add","day":n,"time":"HH:MM","title":"Arabic title","note":"short Arabic note"} | {"op":"swap","a":n,"b":n} | {"op":"sleep","day":n,"city":"Arabic city name"}.\nItem titles must be copied exactly from the plan (the text after the time). Do not judge the trip rules; another checker does that. Reply with JSON only: {"ops":[...],"explain":"one short Arabic sentence"}. If the request is unclear, reply {"ops":[],"explain":"Arabic question"}.\nRequest: ${q}`;
   try{const r=await sample.json(prompt);if(!r||!Array.isArray(r.ops)||!r.ops.length){msg('bad',esc(r&&r.explain||'لم أفهم الطلب، جرّب صياغة أخرى.'));return}
-   msg('ok',esc(r.explain||''));await propose(r.ops)}catch(e){msg('bad',e&&e.code==='rate_limited'?'كثرت الطلبات، حاول بعد قليل.':'تعذّر الاتصال بـ Claude الآن. استخدم النموذج بالأسفل.')}}}
+   msg('ok',esc(r.explain||''));propose(r.ops)}catch(e){msg('bad',e&&e.code==='rate_limited'?'كثرت الطلبات، حاول بعد قليل.':'تعذّر الاتصال بـ Claude الآن. استخدم النموذج بالأسفل.')}}}
 })();
 
 /* ===== Past days + our ratings journal ===== */
