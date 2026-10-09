@@ -171,12 +171,17 @@ dialog.shop[open]{animation:shopin .25s ease-out}
 .shop a.note{margin:22px 0 0}
 @media (max-width:480px){.shop .when div{grid-template-columns:1fr;gap:2px}}
 
-/* Hero: the photo band behind the header follows the city we are in (or the first one before the trip) */
-.hero{position:relative;margin:-28px -20px 0;padding:28px 20px 14px;border-radius:0 0 22px 22px;overflow:hidden;isolation:isolate}
-.hero-bg{position:absolute;inset:0;z-index:-2;background-size:cover;background-position:center;transition:background-image .6s}
-.hero::before{content:"";position:absolute;inset:0;z-index:-1;background:linear-gradient(180deg,color-mix(in srgb,var(--bg) 70%,transparent) 0%,color-mix(in srgb,var(--bg) 86%,transparent) 55%,var(--bg) 100%)}
-.hero-cap{position:absolute;inset-inline-start:12px;top:10px;font-size:12px;color:var(--ink);background:color-mix(in srgb,var(--card) 80%,transparent);border-radius:999px;padding:1px 10px}
-@media (max-width:480px){.hero{margin:-28px -16px 0;padding:28px 16px 12px}}
+/* Hero: a clear photo slideshow of the city we are in (Madrid before the trip), crossfading every 6.5 s */
+.hero{position:relative}
+.slides{position:relative;height:clamp(190px,46vw,320px);border-radius:16px;overflow:hidden;background:var(--line);margin-bottom:18px}
+.slides .sl{position:absolute;inset:0;background-size:cover;background-position:center;opacity:0;transition:opacity 1.2s ease}
+.slides .sl.on{opacity:1}
+.slides::after{content:"";position:absolute;inset:auto 0 0 0;height:38%;background:linear-gradient(0deg,rgba(0,0,0,.45),transparent);pointer-events:none}
+.hero-cap{position:absolute;z-index:1;inset-inline-start:12px;bottom:12px;font-family:var(--display);font-size:20px;font-weight:700;color:#fff;text-shadow:0 1px 6px rgba(0,0,0,.5)}
+.dots{position:absolute;z-index:1;inset-inline-end:12px;bottom:16px;display:flex;gap:5px}
+.dots i{width:7px;height:7px;border-radius:50%;background:rgba(255,255,255,.5)}
+.dots i.on{background:#fff}
+@media (prefers-reduced-motion:reduce){.slides .sl{transition:none}}
 /* City inside the date block of every day */
 .dnum em{display:block;font-style:normal;font-family:var(--body);font-size:12px;font-weight:600;color:var(--myrtle);white-space:nowrap;margin-top:1px}
 /* Countdown label */
@@ -275,7 +280,7 @@ li.edited{background:color-mix(in srgb,var(--gold-soft) 60%,transparent);border-
 .rate .rother p{margin:4px 0 0;color:var(--muted)}
 .rtoast{position:fixed;inset-inline:16px;bottom:calc(72px + env(safe-area-inset-bottom,0px));z-index:7;background:var(--ink);color:var(--card);border-radius:12px;padding:10px 14px;font-size:14px;text-align:center}
 </style></head><body><div class="wrap" lang="ar" dir="rtl">
-<div class="hero" id="hero"><div class="hero-bg" id="hero-bg" style="background-image:url('img/gran_via_1.jpg')"></div><span class="hero-cap" id="hero-cap" aria-hidden="true">مدريد</span><header><svg viewBox="0 0 100 100" class="star" aria-hidden="true"><g fill="none" stroke="currentColor" stroke-width="2.4"><rect x="22" y="22" width="56" height="56"/><rect x="22" y="22" width="56" height="56" transform="rotate(45 50 50)"/><circle cx="50" cy="50" r="13"/></g><circle cx="50" cy="50" r="4" fill="currentColor"/></svg><div><div class="eyebrow">شهر العسل · 4–18 نوفمبر 2026</div><h1>حاتم ولمياء في إسبانيا</h1><p class="sub">مدريد وبرشلونة وغرناطة وقرطبة وساحل الأندلس، ويوم عبر المضيق في طنجة.</p></div></header>
+<div class="hero" id="hero"><div class="slides" id="slides" aria-hidden="true"><div class="sl on" style="background-image:url('img/gran_via_1.jpg')"></div><div class="sl"></div><span class="hero-cap" id="hero-cap">مدريد</span><div class="dots" id="dots"></div></div><header><svg viewBox="0 0 100 100" class="star" aria-hidden="true"><g fill="none" stroke="currentColor" stroke-width="2.4"><rect x="22" y="22" width="56" height="56"/><rect x="22" y="22" width="56" height="56" transform="rotate(45 50 50)"/><circle cx="50" cy="50" r="13"/></g><circle cx="50" cy="50" r="4" fill="currentColor"/></svg><div><div class="eyebrow">شهر العسل · 4–18 نوفمبر 2026</div><h1>حاتم ولمياء في إسبانيا</h1><p class="sub">مدريد وبرشلونة وغرناطة وقرطبة وساحل الأندلس، ويوم عبر المضيق في طنجة.</p></div></header>
 <div class="toprow"><a class="note top" href="https://github.com/algarzaie/honeymoon/issues/new?title=%D9%85%D9%84%D8%A7%D8%AD%D8%B8%D8%A9%20%D8%B9%D8%A7%D9%85%D8%A9%20%D8%B9%D9%84%D9%89%20%D8%A7%D9%84%D8%B1%D8%AD%D9%84%D8%A9" target="_blank" rel="noopener">✎ اكتبي ملاحظة عامة</a></div>
 <div class="count" id="count" aria-live="polite"><div><b>4 نوفمبر</b><span>موعد الانطلاق</span></div></div>
 <div class="route" aria-label="المسار"><ol id="route"><li><button type="button" data-i="0" aria-pressed="false"><i>1</i><strong>مدريد</strong><small>4–6 نوفمبر</small></button></li><li><button type="button" data-i="1" aria-pressed="false"><i>2</i><strong>برشلونة</strong><small>6–9 نوفمبر</small></button></li><li><button type="button" data-i="2" aria-pressed="false"><i>3</i><strong>غرناطة</strong><small>9–11 نوفمبر</small></button></li><li><button type="button" data-i="3" aria-pressed="false"><i>4</i><strong>قرطبة</strong><small>11–13 نوفمبر</small></button></li><li><button type="button" data-i="4" aria-pressed="false"><i>5</i><strong>ماربيا</strong><small>13–17 نوفمبر</small></button></li><li><button type="button" data-i="5" aria-pressed="false"><i>6</i><strong>مدريد ثم الرياض</strong><small>17–18 نوفمبر</small></button></li></ol></div></div>
@@ -310,11 +315,14 @@ document.addEventListener('click',e=>{const b=e.target.closest('[data-shop]');if
  if(e.target.closest('[data-close]')||e.target===dlg)dlg.close()});
 dlg.addEventListener('close',()=>{if(last)last.focus()})})();
 
-/* ===== Hero photo: the city we are in today, or the first destination before the trip ===== */
-(()=>{const STOPS=[['2026-11-06T10:00:00+01:00','img/gran_via_1.jpg','مدريد'],['2026-11-08T17:00:00+01:00','img/park_guell_1.jpg','برشلونة'],['2026-11-09T10:00:00+01:00','img/castelldefels_1.jpg','كاستيلديفيلس'],['2026-11-11T10:00:00+01:00','img/alhambra_3.jpg','غرناطة'],['2026-11-13T10:00:00+01:00','img/alcazar_cord.jpg','قرطبة'],['2026-11-14T07:00:00+01:00','img/naranjos_1.jpg','ماربيا'],['2026-11-14T21:00:00+01:00','img/grand_socco_1.jpg','طنجة'],['2026-11-17T21:10:00+01:00','img/naranjos_1.jpg','ماربيا'],['2099-01-01T00:00:00+01:00','img/gran_via_1.jpg','مدريد']];
- const bg=document.getElementById('hero-bg'),cap=document.getElementById('hero-cap');if(!bg)return;
- const now=Date.now();const s=STOPS.find(x=>now<new Date(x[0]).getTime())||STOPS[STOPS.length-1];
- const src=(window.HERO_IMG&&window.HERO_IMG[s[1]])||s[1];bg.style.backgroundImage=`url("${src}")`;if(cap)cap.textContent=s[2];})();
+/* ===== Hero slideshow: photos of the city we are in today (Madrid before the trip) ===== */
+(()=>{const SETS=[['2026-11-06T10:00:00+01:00','مدريد',['gran_via_1','palacio_real_1','debod_1','retiro_1','plaza_mayor_1']],['2026-11-08T17:00:00+01:00','برشلونة',['park_guell_1','casa_batllo_1','casa_mila_1','passeig_gracia_1']],['2026-11-09T10:00:00+01:00','كاستيلديفيلس',['castelldefels_1','castelldefels_2']],['2026-11-11T10:00:00+01:00','غرناطة',['alhambra_3','alhambra_1','darro_1','alhambra_2','calderia_1']],['2026-11-13T10:00:00+01:00','قرطبة',['alcazar_cord','viana_1','corredera_1']],['2026-11-14T07:00:00+01:00','مالقة وماربيا',['larios_1','naranjos_1','banus_3','banus_1']],['2026-11-14T21:00:00+01:00','طنجة',['grand_socco_1','tangier_1','cafe_hafa_1']],['2026-11-17T21:10:00+01:00','ماربيا',['naranjos_1','banus_3','banus_1','larios_1']],['2099-01-01T00:00:00+01:00','مدريد',['gran_via_1','palacio_real_1','debod_1','retiro_1']]];
+ const box=document.getElementById('slides');if(!box)return;const L=[...box.querySelectorAll('.sl')],cap=document.getElementById('hero-cap'),dots=document.getElementById('dots');
+ const qd=new URLSearchParams(location.search).get('today');const now=qd?new Date(qd+'T12:00:00+01:00').getTime():Date.now();
+ const set=SETS.find(x=>now<new Date(x[0]).getTime())||SETS[SETS.length-1];const imgs=set[2].map(n=>'img/'+n+'.jpg');if(cap)cap.textContent=set[1];
+ dots.innerHTML=imgs.map((_,i)=>`<i class="${i?'':'on'}"></i>`).join('');imgs.forEach(u=>{const im=new Image();im.src=u});
+ let i=0,cur=0;L[0].style.backgroundImage=`url("${imgs[0]}")`;
+ if(imgs.length<2)return;setInterval(()=>{if(document.hidden)return;i=(i+1)%imgs.length;const nx=1-cur;L[nx].style.backgroundImage=`url("${imgs[i]}")`;L[nx].classList.add('on');L[cur].classList.remove('on');cur=nx;[...dots.children].forEach((d,k)=>d.classList.toggle('on',k===i))},6500)})();
 
 /* ===== Countdown to the next exciting moment ===== */
 const NEXT=[['2026-11-04T02:00:00+03:00','الإقلاع إلى مدريد','RX 531'],['2026-11-04T07:15:00+01:00','الوصول إلى مدريد',''],['2026-11-05T10:00:00+01:00','طليطلة',''],['2026-11-06T10:00:00+01:00','القطار إلى برشلونة',''],['2026-11-07T10:00:00+01:00','كاسا باتيو وبارك غويل',''],['2026-11-08T10:30:00+01:00','جبل مونتسيرات',''],['2026-11-08T17:00:00+01:00','ليلة على البحر في كاستيلديفيلس',''],['2026-11-09T10:00:00+01:00','الطيران إلى غرناطة',''],['2026-11-10T10:00:00+01:00','قصر الحمراء',''],['2026-11-11T12:00:00+01:00','مسجد قرطبة الكبير',''],['2026-11-12T10:00:00+01:00','مدينة الزهراء',''],['2026-11-13T12:00:00+01:00','مالقة',''],['2026-11-14T09:00:00+01:00','العبّارة إلى طنجة',''],['2026-11-15T12:00:00+01:00','بويرتو بانوس',''],['2026-11-16T16:30:00+01:00','ركوب الخيل عند الغروب',''],['2026-11-17T10:45:00+01:00','أوتلت ماك آرثر غلين',''],['2026-11-18T09:20:00+01:00','العودة إلى الرياض','RX 532']];
