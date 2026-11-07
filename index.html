@@ -734,7 +734,7 @@ tick();setInterval(tick,30000);
   let btn=bar.querySelector('#pastbtn');if(!past.length){if(btn)btn.remove();if(box)box.remove();return}
   if(!box){box=document.createElement('div');box.className='pastbox';box.hidden=lsGet('show-past')!=='1';panel.insertBefore(box,panel.firstChild)}
   past.forEach(d=>{if(d.parentNode!==box){box.appendChild(d);d.open=false}});
-  if(!btn){btn=document.createElement('button');btn.type='button';btn.id='pastbtn';btn.className='pastbtn';bar.insertBefore(btn,bar.lastElementChild);btn.onclick=()=>{box.hidden=!box.hidden;lsSet('show-past',box.hidden?'0':'1');label()}}
+  if(!btn){btn=document.createElement('button');btn.type='button';btn.id='pastbtn';btn.className='pastbtn';bar.insertBefore(btn,bar.lastElementChild);btn.onclick=()=>{const b=panel.querySelector(':scope>.pastbox');if(!b)return;b.hidden=!b.hidden;lsSet('show-past',b.hidden?'0':'1');arrangePast()}}
   const label=()=>{btn.textContent=(box.hidden?'🕘 الأيام الماضية ':'🕘 إخفاء الأيام الماضية ')+`(${past.length})`;btn.setAttribute('aria-expanded',String(!box.hidden))};label()}
 
  /* journal: copy or share the ratings as text */
