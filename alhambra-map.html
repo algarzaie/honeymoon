@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="ar" data-def="ar">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>خريطة الحمراء · Alhambra map</title>
+<style>
+:root{--bg:#faf7f2;--card:#fff;--ink:#2b2a27;--mute:#6b6862;--line:#e3ddd2;--acc:#0f6e56;--acc2:#e1f5ee;--warn:#854f0b;--warnbg:#faeeda;--zone:#efe7d8;--zone2:#e4efe0}
+@media (prefers-color-scheme:dark){:root{--bg:#1c1b19;--card:#262522;--ink:#eeeae2;--mute:#a8a49b;--line:#3a3833;--acc:#5dcaa5;--acc2:#0f3a2e;--warn:#fac775;--warnbg:#412402;--zone:#2f2c26;--zone2:#24302a}}
+*{box-sizing:border-box}body{margin:0;font-family:-apple-system,system-ui,Segoe UI,Roboto,sans-serif;background:var(--bg);color:var(--ink);font-size:16px;line-height:1.5}
+header{padding:12px 14px 6px;display:flex;justify-content:space-between;align-items:center;gap:8px}
+h1{font-size:18px;font-weight:600;margin:0}
+.clock{font-size:12px;color:var(--mute);background:var(--card);border:1px solid var(--line);border-radius:20px;padding:3px 10px;white-space:nowrap}
+.mapwrap{margin:0 10px;background:var(--card);border:1px solid var(--line);border-radius:14px;overflow:hidden;position:sticky;top:0;z-index:2}
+svg{display:block;width:100%;height:auto;touch-action:manipulation}
+.mk{cursor:pointer}
+.ctrl{display:flex;gap:8px;padding:10px}
+button{font:inherit;font-size:14px;border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:10px;padding:10px 12px;cursor:pointer}
+button.main{flex:1;background:var(--acc);color:#fff;border-color:var(--acc)}
+.card{margin:10px;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px 16px}
+.top{display:flex;justify-content:space-between;align-items:baseline;gap:8px}
+.name{font-size:18px;font-weight:600;margin:0}
+.time{font-size:13px;color:var(--mute);white-space:nowrap}
+.ar{font-size:17px;color:var(--acc);margin:2px 0 10px;direction:rtl;text-align:right}
+.tag{display:inline-block;font-size:12px;background:var(--acc2);color:var(--acc);border-radius:20px;padding:2px 9px;margin:0 4px 6px 0}
+h3{font-size:13px;text-transform:none;color:var(--mute);margin:12px 0 4px;font-weight:600}
+ul{margin:0;padding-inline-start:18px;padding-left:0}li{margin:0 0 5px}
+.insc{border-inline-start:3px solid var(--acc);padding:6px 10px;margin:8px 0;background:var(--acc2);border-radius:0}
+.insc .a{direction:rtl;text-align:right;font-size:18px}
+.insc .t{font-size:14px;color:var(--mute)}
+.warn{background:var(--warnbg);color:var(--warn);border-radius:10px;padding:8px 10px;font-size:14px;margin-top:10px}
+a.gm{display:inline-block;margin-top:12px;color:var(--acc);font-weight:600;text-decoration:none}
+.list{margin:10px}
+.row{display:flex;gap:10px;align-items:center;padding:9px 6px;border-bottom:1px solid var(--line);cursor:pointer}
+.num{width:26px;height:26px;border-radius:50%;background:var(--acc);color:#fff;font-size:13px;display:flex;align-items:center;justify-content:center;flex:0 0 26px}
+.num.closed{background:#888780}
+.row .rt{font-size:13px;color:var(--mute);margin-left:auto}
+.row.on{background:var(--acc2)}
+.legend{font-size:12px;color:var(--mute);padding:0 12px 8px}
+</style>
+</head>
+<body>
+<header><h1 id="ttl">Alhambra · Thu 19 Nov</h1><span style="display:flex;gap:6px;align-items:center"><span class="clock" id="clock"></span><button id="lang" style="padding:4px 10px;font-size:13px">عربي</button></span></header><a href="./" id="back" style="display:block;margin:0 14px 8px;font-size:14px;color:var(--acc)">→ العودة إلى البرنامج</a>
+<div class="mapwrap">
+<svg viewBox="0 0 740 280" id="map" aria-label="Schematic map of the Alhambra route">
+<path d="M18 168 L40 140 L120 118 L210 92 L300 72 L380 56 L470 36 L560 30 L600 60 L560 110 L470 160 L380 190 L300 205 L220 225 L150 228 L80 210 Z" fill="var(--zone)" stroke="var(--line)" stroke-width="2"/>
+<path d="M600 120 L690 110 L728 150 L715 215 L640 240 L590 215 L585 165 Z" fill="var(--zone2)" stroke="var(--line)" stroke-width="2"/>
+<text x="60" y="195" font-size="15" fill="var(--mute)" id="lz1">Alcazaba</text>
+<text x="230" y="160" font-size="15" fill="var(--mute)" id="lz2">Nasrid Palaces</text>
+<text x="400" y="150" font-size="15" fill="var(--mute)" id="lz3">Medina · Secano</text>
+<text x="615" y="232" font-size="15" fill="var(--mute)" id="lz4">Generalife</text>
+<text x="300" y="30" font-size="13" fill="var(--mute)" id="lz5">↑ Darro valley · Albaicín</text>
+<text x="250" y="270" font-size="13" fill="var(--mute)" id="lz6">↓ City · Cuesta de Gomérez</text>
+<polyline id="route" fill="none" stroke="var(--acc)" stroke-width="3" stroke-dasharray="7 5" stroke-linecap="round" stroke-linejoin="round"/>
+<g id="mks"></g>
+</svg>
+<div class="ctrl">
+<button id="prev" aria-label="Previous">◀</button>
+<button class="main" id="now">Where should we be now?</button>
+<button id="next" aria-label="Next">▶</button>
+</div>
+<div class="legend" id="leg">Tap a number. Grey = closed today. Schematic map (not to scale); use Google Maps link for exact spot.</div>
+</div>
+<div class="card" id="card"></div>
+<div class="list" id="list"></div>
+<script>
+const S=[
+{n:1,x:220,y:220,t:"14:10",e:"14:17",name:"Puerta de la Justicia",ar:"باب الشريعة",tags:["Yusuf I","1348"],
+h:["Built by Sultan Yusuf I in 1348 (Muharram 749 AH), dated by one of the few foundation inscriptions found in the Alhambra.","Its name means Gate of the Sharia (Law); it was the main ceremonial entrance from the south.","Bent (zig-zag) passage so attackers could not charge straight through."],
+look:["Carved hand on the outer arch, traditionally the five pillars of Islam","Carved key on the inner arch, a Nasrid symbol of faith and rule","Foundation inscription in white Macael marble inlaid with slate, a technique found nowhere else here"],
+w:"A Virgin-and-child niche was placed over the inscription c.1500. Frame the outer arch from below to avoid it.",q:"37.17611,-3.59020"},
+{n:2,x:120,y:166,t:"14:17",e:"14:40",name:"Alcazaba (citadel)",ar:"القصبة",tags:["Muhammad I","1238","Oldest part"],
+h:["The oldest part of the Alhambra; its walls rest on 11th-century Zirid fortifications.","Muhammad I ibn al-Ahmar, founder of the Nasrid dynasty, made Granada his capital in 1238 and moved the court here from the Albaicín.","Muhammad I and his son Muhammad II lived here until the palaces were built; afterwards it was purely a garrison."],
+look:["Barrio Castrense: foundations of soldiers' houses, a cistern and the oldest baths in the Alhambra","Puerta de las Armas terrace: view of the Albaicín","Jardín de los Adarves: quiet garden on the south rampart, good for prayer"],
+w:"Adapted route after the August earthquakes. Scaffolding on the Torre del Homenaje and Torre Quebrada. Leave by 14:40!",q:"37.17680,-3.59180"},
+{n:3,x:30,y:158,t:"—",e:"",closed:true,name:"Torre de la Vela",ar:"البرج الأعظم",tags:["Muhammad I","2 Jan 1492"],
+h:["Built by Muhammad I, originally called al-Burj al-Aʿẓam, the Great Tower.","On 2 January 1492 the Castilian banners were raised here as Muhammad XII (Boabdil) surrendered Granada, ending 254 years of Nasrid rule and nearly 8 centuries of al-Andalus.","Its bell later rang irrigation signals for the Vega."],
+look:["View from outside only"],w:"Closed today, so you can't climb it.",q:"37.17690,-3.59340"},
+{n:4,x:200,y:162,t:"14:45",e:"15:00",name:"Nasrid Palaces queue",ar:"القصور النصرية",tags:["Entry 15:00–15:30"],
+h:["The royal palaces were the heart of the Nasrid court in the 14th century, built mainly by Ismaʿil I, Yusuf I and Muhammad V."],
+look:["Have the QR codes and passports ready","The route is one-way, so you can't go back or re-enter","No flash and no selfie sticks inside"],
+w:"Be in line by 14:45. If you miss the 15:00–15:30 window you lose the palaces.",q:"37.17685,-3.59050"},
+{n:5,x:206,y:126,t:"15:00",e:"15:20",name:"Mexuar, oratory and Cuarto Dorado",ar:"المشور",tags:["Ismaʿil I","Muhammad V","1370"],
+h:["Council hall where the sultan heard petitions, first built by Ismaʿil I (r. 1314–1325) and remodelled by Muhammad V.","At its end is a small oratory whose mihrab is angled toward the qibla (about 100°, ESE).","Comares Façade, dated 1370 by Muhammad V: the sultan sat here to hold public audiences. Of its two doors, only one leads into the palace."],
+insc:{a:"وَلَا غَالِبَ إِلَّا ٱللَّٰه",t:"“There is no victor but God”: the Nasrid motto, repeated throughout the palaces"},
+look:["Mihrab and windows over the Albaicín in the oratory","Gilded wooden ceiling of the Cuarto Dorado"],
+w:"Avoid photographing the later Christian choir gallery. The façade may be covered by scaffolding.",q:"37.17715,-3.59040"},
+{n:6,x:238,y:100,t:"15:20",e:"15:35",name:"Patio de los Arrayanes (Comares)",ar:"قصر قمارش",tags:["Yusuf I","Palace of state"],
+h:["The official palace of state: founded by Ismaʿil I and expanded by Yusuf I (r. 1333–1354).","The Comares Tower (45 m), the tallest in the Alhambra, held the throne hall (Salón de Embajadores).","The throne hall's cedar ceiling has 8,017 pieces representing the seven heavens leading to Paradise."],
+insc:{a:"تَبَارَكَ ٱلَّذِي بِيَدِهِ ٱلْمُلْكُ",t:"Sūrat al-Mulk (67:1–5) runs around the throne-hall cornice"},
+look:["Classic photo: from the south end, the tower reflected in the pool","Portico poems written as if the building were speaking"],
+w:"The throne hall and Sala de la Barca are closed today, so look in from the portico.",q:"37.17745,-3.58990"},
+{n:7,x:278,y:116,t:"15:35",e:"16:05",name:"Palace of the Lions",ar:"رياض السعيد",tags:["Muhammad V","from 1362","Ibn Zamrak"],
+h:["Muhammad V's private palace, begun in 1362: 124 marble columns, with 12 lions carrying the fountain.","Four channels run out from the fountain, symbolising the four rivers of Paradise.","Sala de los Abencerrajes: a 16-sided star dome. The beheading of the Banū Sarrāj knights here is a legend, and the red stain is iron oxide.","Sala de Dos Hermanas (al-Qubba al-Kubrā): a muqarnas dome of 5,416 pieces.","Sala de los Reyes: 14th-century painted leather ceilings."],
+insc:{a:"قصيدة ابن زمرك",t:"Ibn Zamrak's 12-verse poem on the fountain rim: the water like a lover's tears hiding for fear of betrayal"},
+look:["Look straight up in the Abencerrajes hall","Shoot the long axis from the west pavilion"],
+w:"Restoration is underway, so some areas may be screened.",q:"37.17725,-3.58925"},
+{n:8,x:278,y:88,t:"16:05",e:"16:15",name:"Mirador de Lindaraja and exit",ar:"عين دار عائشة",tags:["Muhammad V","1526 · 1829"],
+h:["The window was the 'eye of the house of ʿĀʾisha', with original Nasrid coloured glass.","Charles V added rooms here after his visit in 1526. Washington Irving lived in them in 1829 and wrote Tales of the Alhambra, which made the Alhambra famous in the West."],
+insc:{a:"وَقَدْ أَفْلَحَ ٱلْيَوْمَ مَنِ ٱسْتَعْلَىٰ",t:"Quran 20:64, framed by Ibn Zamrak's verses"},
+look:["Tiny tile pieces, some about 2 mm","The exit is one-way into the Partal"],w:"",q:"37.17755,-3.58925"},
+{n:9,x:330,y:62,t:"16:15",e:"16:35",name:"Partal and Oratorio",ar:"البرطل",tags:["Muhammad III","Yusuf I"],
+h:["The oldest surviving palace in the Alhambra, built by Muhammad III (r. 1302–1309).","The original carved dome of the Torre de las Damas is now in Berlin's Museum of Islamic Art.","Yusuf I's private oratory projects toward Makkah, with a muqarnas mihrab and Kufic inscriptions."],
+look:["Portico reflected in the pool","The oratory's mihrab, seen from the doorway","Garden terraces: quiet spot for Asr prayer"],w:"",q:"37.17790,-3.58850"},
+{n:10,x:525,y:38,t:"16:35",e:"16:50",name:"Paseo de las Torres",ar:"ممشى الأبراج",tags:["Yusuf I","Ibn al-Jayyāb"],
+h:["About 700 m east along the north wall.","Torre de la Cautiva: a tower-palace decorated under Yusuf I with poems by Ibn al-Jayyāb.","Torre de las Infantas: late Nasrid. Secano: excavated foundations of the Nasrid medina."],
+look:["The towers are seen from outside only"],w:"Keep moving and reach the Generalife before about 17:00. Stay off Calle Real (it has a church and the Parador).",q:"37.17840,-3.58530"},
+{n:11,x:650,y:150,t:"16:50",e:"17:30",name:"Generalife: Patio de la Acequia",ar:"جنة العريف",tags:["Muhammad II/III","Ismaʿil I 1319"],
+h:["The sultans' summer villa on the Cerro del Sol, which Ibn Zamrak called the Throne of the Alhambra.","Built under Muhammad II or III, and redecorated by Ismaʿil I in 1319 (dated inscription).","The long water channel garden follows the Nasrid Paradise plan; the original soil lies 70 cm below today's beds."],
+look:["North pavilion: framed view back to the Alhambra","Victory verses for Ismaʿil I in the stucco"],
+w:"Last access to the Generalife is about 17:00.",q:"37.17700,-3.58330"},
+{n:12,x:700,y:182,t:"17:30",e:"18:01",name:"Escalera del Agua and upper gardens",ar:"درج الماء",tags:["Nasrid","Sunset 18:01"],
+h:["A Nasrid stairway with water running down channels in its handrails, under laurel trees.","Patio de la Sultana: the cypress tryst story is a romantic legend.","The upper gardens look out west over the Alhambra and the city."],
+look:["Sunset at 18:01 from the upper terraces"],w:"This area may close in strong wind.",q:"37.17660,-3.58250"},
+{n:13,x:615,y:220,t:"18:00",e:"",name:"Exit (Access Pavilion)",ar:"المخرج",tags:["Closing 18:00"],
+h:["Walk down the Paseo de las Adelfas, about 7 minutes."],
+look:["Toilets, shop and taxis","For Maghrib: Mezquita Mayor de Granada by the Mirador de San Nicolás"],
+w:"Book the Rodríguez-Acosta Foundation for 20 Nov (10:00–14:00) tonight at entradasfra.com.",q:"37.17610,-3.58380"}];
+const AR=[
+{name:"باب الشريعة (باب العدل)",tags:["يوسف الأول","1348م"],
+h:["بناه السلطان يوسف الأول سنة 1348م (محرم 749هـ)، وتاريخه مثبت في نقش تأسيسي من النقوش القليلة التي عُثر عليها في الحمراء.","اسمه «باب الشريعة»، وكان المدخل الرسمي الرئيسي من جهة الجنوب.","ممرّه منكسر (متعرّج) حتى لا يستطيع المهاجمون الاندفاع إلى الداخل مباشرة."],
+look:["كفّ منحوتة على القوس الخارجي، تُفسَّر تقليدياً بأركان الإسلام الخمسة","مفتاح منحوت على القوس الداخلي، رمز نصري للإيمان والسيادة","النقش التأسيسي من رخام ماكايل الأبيض المطعّم بالأردواز، وهي تقنية لا مثيل لها في الحمراء"],
+w:"وُضعت فوق النقش نحو سنة 1500م كوّة فيها تمثال مسيحي، فصوّرا القوس الخارجي من الأسفل لتجنّبه."},
+{name:"القصبة (القلعة)",tags:["محمد الأول","1238م","أقدم جزء"],
+h:["أقدم أجزاء الحمراء، وأسوارها قائمة على تحصينات زيرية من القرن الحادي عشر.","اتخذ محمد الأول ابن الأحمر، مؤسس الدولة النصرية، غرناطة عاصمة له سنة 1238م، ونقل البلاط إلى هنا من حي البيازين.","سكنها محمد الأول وابنه محمد الثاني حتى اكتمال القصور، ثم صارت حامية عسكرية فقط."],
+look:["حي الجند (Barrio Castrense): أساسات بيوت الجنود وصهريج ماء وأقدم حمّامات الحمراء","شرفة باب السلاح: إطلالة على حي البيازين","حديقة الأسوار (Adarves): حديقة هادئة على السور الجنوبي تصلح للصلاة"],
+w:"المسار معدَّل بعد زلازل أغسطس، وعلى برجَي الحراسة والمكسور سقالات. اخرجا قبل 14:40!"},
+{name:"برج الحراسة (توري دي لا فيلا)",tags:["محمد الأول","2 يناير 1492م"],
+h:["بناه محمد الأول، وكان اسمه الأول «البرج الأعظم».","في 2 يناير 1492م رُفعت عليه رايات قشتالة حين سلّم محمد الثاني عشر (أبو عبد الله الصغير) غرناطة، فانتهى حكم بني نصر بعد 254 عاماً، وانتهى معه قرابة ثمانية قرون من الأندلس.","صار جرسه فيما بعد يُقرع لتنظيم ريّ المرج (الفيغا)."],
+look:["يُشاهَد من الخارج فقط"],w:"مغلق اليوم، فلا يمكن صعوده."},
+{name:"طابور القصور النصرية",tags:["الدخول 15:00–15:30"],
+h:["القصور الملكية قلب البلاط النصري في القرن الرابع عشر، وبناها أساساً إسماعيل الأول ويوسف الأول ومحمد الخامس."],
+look:["جهّزا رموز QR والجوازات","المسار في اتجاه واحد، فلا رجوع ولا دخول مرة ثانية","لا فلاش ولا عصا سيلفي في الداخل"],
+w:"كونا في الطابور قبل 14:45. إن فاتكما موعد 15:00–15:30 فاتتكما القصور."},
+{name:"المشور والمصلّى والقاعة الذهبية",tags:["إسماعيل الأول","محمد الخامس","1370م"],
+h:["قاعة المجلس التي كان السلطان يسمع فيها المظالم؛ بناها إسماعيل الأول (1314–1325م) وجدّدها محمد الخامس.","في آخرها مصلّى صغير محرابه مائل نحو القبلة (نحو 100°، شرق الجنوب الشرقي).","واجهة قمارش، مؤرَّخة سنة 1370م في عهد محمد الخامس: كان السلطان يجلس عندها للقاء العامة. لها بابان، أحدهما فقط يؤدي إلى القصر."],
+insc:"«ولا غالب إلا الله»: شعار بني نصر، يتكرر في أرجاء القصور",
+look:["المحراب ونوافذ المصلّى المطلّة على البيازين","السقف الخشبي المذهّب في القاعة الذهبية"],
+w:"تجنّبا تصوير الشرفة المسيحية المضافة لاحقاً. قد تكون الواجهة مغطاة بسقالات."},
+{name:"بهو الريحان (قصر قمارش)",tags:["يوسف الأول","قصر الحكم"],
+h:["قصر الدولة الرسمي: أسّسه إسماعيل الأول ووسّعه يوسف الأول (1333–1354م).","برج قمارش (45 م) أعلى أبراج الحمراء، وفيه قاعة العرش (قاعة السفراء).","سقف قاعة العرش من خشب الأرز، فيه 8017 قطعة ترمز إلى السماوات السبع المؤدية إلى الجنة."],
+insc:"سورة الملك (الآيات 1–5) تحيط بإفريز قاعة العرش",
+look:["الصورة الأشهر: من الطرف الجنوبي والبرج منعكس في البركة","أشعار على الرواق كُتبت كأن المبنى هو المتكلم"],
+w:"قاعة العرش وقاعة البركة مغلقتان اليوم، فانظرا إليهما من الرواق."},
+{name:"قصر الأسود",tags:["محمد الخامس","من 1362م","ابن زمرك"],
+h:["القصر الخاص لمحمد الخامس، بدأ بناءه سنة 1362م: 124 عموداً رخامياً، و12 أسداً تحمل النافورة.","تخرج من النافورة أربع قنوات ترمز إلى أنهار الجنة الأربعة.","قاعة بني سرّاج: قبة نجمية بستة عشر ضلعاً. قصة ذبح فرسان بني سرّاج هنا أسطورة، والبقعة الحمراء أكسيد حديد.","قاعة الأختين (القبة الكبرى): قبة مقرنصات من 5416 قطعة.","قاعة الملوك: سقوف جلدية ملوّنة من القرن الرابع عشر."],
+insc:"قصيدة ابن زمرك (12 بيتاً) على حافة النافورة: الماء كدموع عاشق تختبئ خوفاً من الوشاة",
+look:["انظرا إلى الأعلى مباشرة في قاعة بني سرّاج","صوّرا المحور الطويل من الجناح الغربي"],
+w:"الترميم جارٍ، فقد تكون بعض الأجزاء مغطاة."},
+{name:"مشربية لندراخا والخروج",tags:["محمد الخامس","1526م · 1829م"],
+h:["كانت المشربية «عين دار عائشة»، وفيها زجاج ملوّن نصري أصلي.","أضاف كارلوس الخامس غرفاً هنا بعد زيارته سنة 1526م، وسكنها الكاتب الأمريكي واشنطن إيرفينغ سنة 1829م وكتب «حكايات الحمراء» التي عرّفت الغرب بها."],
+insc:"﴿وَقَدْ أَفْلَحَ ٱلْيَوْمَ مَنِ ٱسْتَعْلَىٰ﴾ (طه: 64)، تحيط بها أبيات ابن زمرك",
+look:["قطع زليج دقيقة، بعضها نحو 2 مم","الخروج في اتجاه واحد إلى البرطل"],w:""},
+{name:"البرطل والمصلّى",tags:["محمد الثالث","يوسف الأول"],
+h:["أقدم قصر باقٍ في الحمراء، بناه محمد الثالث (1302–1309م).","قبة برج السيدات المنحوتة الأصلية موجودة اليوم في متحف الفن الإسلامي في برلين.","مصلّى يوسف الأول الخاص بارز نحو مكة، فيه محراب بمقرنصات ونقوش كوفية."],
+look:["الرواق منعكساً في البركة","محراب المصلّى من عند الباب","شرفات الحديقة: مكان هادئ لصلاة العصر"],w:""},
+{name:"ممشى الأبراج",tags:["يوسف الأول","ابن الجيّاب"],
+h:["نحو 700 م شرقاً بمحاذاة السور الشمالي.","برج الأسيرة: برج-قصر زُيّن في عهد يوسف الأول بأشعار ابن الجيّاب.","برج الأميرات من أواخر العهد النصري، والسيكانو أساسات المدينة النصرية المكتشفة."],
+look:["الأبراج تُشاهَد من الخارج فقط"],w:"واصلا المشي لتصلا جنة العريف قبل نحو 17:00. تجنّبا الشارع الملكي (فيه كنيسة والبارادور)."},
+{name:"جنة العريف: بهو الساقية",tags:["محمد الثاني/الثالث","إسماعيل الأول 1319م"],
+h:["مصيف السلاطين على جبل الشمس، وسمّاها ابن زمرك «عرش الحمراء».","بُنيت في عهد محمد الثاني أو الثالث، وجدّد زخرفتها إسماعيل الأول سنة 1319م (بنقش مؤرَّخ).","قناة الماء الطويلة على تخطيط الجنة النصري، والتربة الأصلية على عمق 70 سم تحت الأحواض الحالية."],
+look:["الجناح الشمالي: إطلالة مؤطّرة على الحمراء","أبيات نصر لإسماعيل الأول في الجص"],
+w:"آخر دخول إلى جنة العريف نحو 17:00."},
+{name:"درج الماء والحدائق العليا",tags:["نصري","الغروب 18:01"],
+h:["درج نصري يجري الماء في قنوات على درابزينه، تحت أشجار الغار.","بهو السلطانة: قصة لقاء السرو أسطورة رومانسية.","الحدائق العليا تطلّ غرباً على الحمراء والمدينة."],
+look:["الغروب الساعة 18:01 من الشرفات العليا"],w:"قد تُغلق هذه المنطقة إذا اشتدّت الرياح."},
+{name:"الخروج (مبنى الدخول)",tags:["الإغلاق 18:00"],
+h:["انزلا عبر ممشى الدفلى، نحو 7 دقائق."],
+look:["دورات مياه ومتجر وسيارات أجرة","لصلاة المغرب: مسجد غرناطة الكبير بجوار إطلالة سان نيكولاس"],
+w:"احجزا زيارة مؤسسة رودريغيث-أكوستا ليوم 20 نوفمبر (10:00–14:00) الليلة من entradasfra.com."}];
+
+const NS="http://www.w3.org/2000/svg",g=document.getElementById("mks"),list=document.getElementById("list");let cur=0;
+document.getElementById("route").setAttribute("points",S.filter(s=>!s.closed).map(s=>s.x+","+s.y).join(" "));
+S.forEach((s,i)=>{const el=document.createElementNS(NS,"g");el.setAttribute("class","mk");
+el.innerHTML=`<circle cx="${s.x}" cy="${s.y}" r="14" fill="${s.closed?'#888780':'var(--acc)'}" stroke="var(--card)" stroke-width="3"/><text x="${s.x}" y="${s.y+5}" text-anchor="middle" font-size="14" font-weight="700" fill="#fff">${s.n}</text>`;
+el.addEventListener("click",()=>show(i));g.appendChild(el);
+const r=document.createElement("div");r.className="row";r.innerHTML=`<span class="num${s.closed?' closed':''}">${s.n}</span><span>${s.name}</span><span class="rt">${s.t}</span>`;r.onclick=()=>{show(i);scrollTo({top:0,behavior:"smooth"})};list.appendChild(r)});
+const UI={en:{ttl:"Alhambra · Thu 19 Nov",now:"Where should we be now?",hist:"History",look:"Look for",gm:"📍 Open this spot in Google Maps",clock:"Madrid ",btn:"عربي",leg:"Tap a number. Grey = closed today. Schematic map (not to scale); use the Google Maps link for the exact spot.",lz:["Alcazaba","Nasrid Palaces","Medina · Secano","Generalife","↑ Darro valley · Albaicín","↓ City · Cuesta de Gomérez"]},
+ar:{ttl:"قصر الحمراء · الخميس 19 نوفمبر",now:"أين يجب أن نكون الآن؟",hist:"نبذة تاريخية",look:"ابحثا عن",gm:"📍 افتح الموقع في خرائط Google",clock:"مدريد ",btn:"English",leg:"اضغطا على الرقم. الرمادي = مغلق اليوم. الخريطة توضيحية وليست بمقياس رسم؛ استخدما رابط خرائط Google للموقع الدقيق.",lz:["القصبة","القصور النصرية","المدينة · السيكانو","جنة العريف","↑ وادي حدرّه · البيازين","↓ المدينة · طلعة غوميريث"]}};
+let L=document.documentElement.dataset.def||"en";if(location.hash==="#ar")L="ar";if(location.hash==="#en")L="en";
+function applyLang(){const u=UI[L];document.documentElement.lang=L;document.body.dir=L==="ar"?"rtl":"ltr";
+document.getElementById("ttl").textContent=u.ttl;document.getElementById("now").textContent=u.now;document.getElementById("lang").textContent=u.btn;document.getElementById("leg").textContent=u.leg;
+u.lz.forEach((t,k)=>document.getElementById("lz"+(k+1)).textContent=t);
+[...list.children].forEach((r,j)=>r.children[1].textContent=L==="ar"?AR[j].name:S[j].name);nowM();show(cur)}
+function show(i){cur=i;const s0=S[i],a=AR[i];const s=L==="ar"?Object.assign({},s0,{name:a.name,tags:a.tags,h:a.h,look:a.look,w:a.w,insc:s0.insc?{a:s0.insc.a,t:a.insc}:null}):s0;const u=UI[L];
+[...g.children].forEach((c,j)=>c.querySelector("circle").setAttribute("r",j===i?20:14));
+[...list.children].forEach((c,j)=>c.classList.toggle("on",j===i));
+document.getElementById("card").innerHTML=`<div class="top"><p class="name">${s.n}. ${s.name}</p><span class="time">${s.t}${s.e?"–"+s.e:""}</span></div>
+${L==="ar"?"":`<div class="ar">${s.ar}</div>`}${s.tags.map(t=>`<span class="tag">${t}</span>`).join("")}
+<h3>${u.hist}</h3><ul>${s.h.map(x=>`<li>${x}</li>`).join("")}</ul>
+${s.insc?`<div class="insc"><div class="a">${s.insc.a}</div><div class="t">${s.insc.t}</div></div>`:""}
+<h3>${u.look}</h3><ul>${s.look.map(x=>`<li>${x}</li>`).join("")}</ul>
+${s.w?`<div class="warn">${s.w}</div>`:""}
+<a class="gm" href="https://www.google.com/maps?q=${s.q}" target="_blank" rel="noopener">${u.gm}</a>`}
+const mins=t=>{const[a,b]=t.split(":");return +a*60+ +b};
+function nowM(){const p=new Intl.DateTimeFormat("en-GB",{timeZone:"Europe/Madrid",hour:"2-digit",minute:"2-digit",hour12:false}).format(new Date());document.getElementById("clock").textContent=UI[L].clock+p;return mins(p)}
+function jump(){const m=nowM();let k=0;S.forEach((s,i)=>{if(s.t.includes(":")&&mins(s.t)<=m)k=i});show(k)}
+document.getElementById("prev").onclick=()=>show((cur+S.length-1)%S.length);
+document.getElementById("next").onclick=()=>show((cur+1)%S.length);
+document.getElementById("now").onclick=jump;
+document.getElementById("lang").onclick=()=>{L=L==="ar"?"en":"ar";applyLang()};
+setInterval(nowM,30000);jump();applyLang();
+</script>
+</body>
+</html>
